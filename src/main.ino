@@ -816,20 +816,15 @@ void calibration()
 }
 void getrp(double a, double b)
 {
-    double A;
-    double B;
-    double ro;
-    double pic;
-    double judge;
-    A = tan(a);
-    B = tan(b);
-    pic = atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
-    ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
-    judge = 1 / (A * sin(-gy[0]) - cos(-gy[0])) * sin(ro);
+    double A = tan(a);
+    double B = tan(b);
+    double ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
+    double pic= atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
+    double judge = 1 / (A * sin(-gy[0]) - cos(-gy[0])) * sin(ro);
     if (judge > 0)
     {
-        pic = (-1) * pic;
-        ro = (-1) * ro;
+        pic *=-1;
+        ro *=-1 ;
     }
     kxa_m = ro;
     kya_m = pic;
