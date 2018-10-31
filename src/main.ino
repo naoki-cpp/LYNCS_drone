@@ -240,7 +240,7 @@ void change(double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration();
 void flypower();
-void getrp(double, double);
+void getrp(double theta_a, double theta_b);
 void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
 void gppid(double array[], double a_m, double PB, double DT, double Td, double T);
 long curMicros;
@@ -814,10 +814,10 @@ void calibration()
     delay(1000);
     Serial.println("start");
 }
-void getrp(double a, double b)
+void getrp(double theta_a, double theta_b)
 {
-    double A = tan(a);
-    double B = tan(b);
+    double A = tan(theta_a);
+    double B = tan(theta_b);
     double pic= atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
     double ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
     double judge = 1 / (A * sin(-gy[0]) - cos(-gy[0])) * sin(ro);
