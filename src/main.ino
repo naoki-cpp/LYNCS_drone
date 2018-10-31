@@ -36,7 +36,7 @@
 #define clow 0
 
 double ttt;
-double ddd = 0;
+//double ddd = 0;
 double x_k;
 double P_k;
 double ovh;
@@ -353,6 +353,7 @@ ISR(SPI_STC_vect)
 
 void loop()
 {
+    //初回のみ実行
     if (process_it)
     {
         buf[pos] = 0;
