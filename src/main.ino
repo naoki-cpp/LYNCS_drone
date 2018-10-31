@@ -248,9 +248,6 @@ char jo;
 //MS5xxx sensor(&Wire);
 void setup()
 {
-    double x;
-    double y;
-    double z;
     oldypr[0] = 0;
     oldypr[1] = 0;
     oldypr[2] = 0;
@@ -287,8 +284,7 @@ void setup()
     Wire.begin();
     Wire.setClock(400000L);
     Serial.begin(115200);
-    while (!Serial)
-        ;
+    while (!Serial);
 
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
@@ -305,11 +301,11 @@ void setup()
         packetSize = mpu.dmpGetFIFOPacketSize();
     }
     // 加速度/ジャイロセンサーの初期化。
+    double x = 0.0000000001;
+    double y = 0.0000000001;
+    double z = 0.0000000001;
     for (int i_r = 0; i_r < 3; i_r++)
     { // 重力加速度から角度を求める。
-        x = 0.0000000001;
-        y = 0.0000000001;
-        z = 0.0000000001;
         cleenarray3(kx_a, x);
         cleenarray3(kxa_a, x);
         cleenarray3(ky_a, y);
