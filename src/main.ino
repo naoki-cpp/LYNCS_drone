@@ -116,7 +116,6 @@ double countx;
 double ky_m = 0;
 double kz_m = 0;
 double vkx;
-double power_a[3];
 double vky;
 double vkz;
 double l;
