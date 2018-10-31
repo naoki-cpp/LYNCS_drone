@@ -690,7 +690,7 @@ void cleenarray3(double array[], double newdata)
 }
 void cal1(double f[3][3], double g[3][3])
 {
-    for(int i = 0; i < 3; i++)
+    for (int i = 0; i < 3; ++i)
     {
         for (int j = 0; j < 3; ++j)
         {
