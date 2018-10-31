@@ -116,7 +116,6 @@ double countx;
 double ky_m = 0;
 double kz_m = 0;
 double vkx;
-double power;
 double power_a[3];
 double vky;
 double vkz;
@@ -668,7 +667,7 @@ if(ddd==1){
 
         //Serial.println(vkz);
         flypower(vkx + vky - vkz + vp + 1100, vkx - vky + vkz + vp + 1100, -vkx + vky + vkz + vp + 1100, -vkx - vky - vkz + vp + 1100);
-        countx = countx + 1;
+        countx++;
         /* Serial.print(pty);
    Serial.print(" ");
    Serial.print(ptx);
