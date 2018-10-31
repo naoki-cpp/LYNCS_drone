@@ -818,8 +818,8 @@ void getrp(double a, double b)
 {
     double A = tan(a);
     double B = tan(b);
-    double ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
     double pic= atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
+    double ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
     double judge = 1 / (A * sin(-gy[0]) - cos(-gy[0])) * sin(ro);
     if (judge > 0)
     {
