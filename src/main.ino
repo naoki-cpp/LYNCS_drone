@@ -1,10 +1,10 @@
 #include <math.h>
 #include <stdio.h>
+
 #include <Servo.h>
 #include <SPI.h>
 #include <Wire.h>
 //#include <MS5xxx.h>
-
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 #define bv 0.05745024
@@ -15,7 +15,6 @@
 #define B_M 0.53
 #define B_m 0.5996
 #define u 0
-#define PI 3.1415
 #define Out1 5
 #define Out2 6
 #define Out3 9
@@ -190,7 +189,7 @@ int country = 0;
 int coucou = 0;
 int w = 0;
 int e;
-int spi1;//ピンから送られてきた信号
+int spi1; //ピンから送られてきた信号
 int spi2;
 int spi3;
 int spi4;
@@ -226,6 +225,9 @@ double timetime1 = 0;
 double timetime2 = 0;
 double TIME;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
+long curMicros;
+char jo;
+
 void dmpDataReady()
 {
     mpuInterrupt = true;
@@ -243,8 +245,6 @@ void flypower();
 void getrp(double theta_a, double theta_b);
 void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
 void gppid(double array[], double a_m, double PB, double DT, double Td, double T);
-long curMicros;
-char jo;
 //MS5xxx sensor(&Wire);
 void setup()
 {
@@ -292,10 +292,12 @@ void setup()
 
     Wire.begin();
     Wire.setClock(400000L);
-    Serial.begin(115200);
-    
-    while (!Serial);
 
+    Serial.begin(115200);
+    while (!Serial)
+        ;
+
+    //MPU6050の初期化
     mpu.initialize();
     devStatus = mpu.dmpInitialize();
     mpu.setXGyroOffset(209);
@@ -310,17 +312,20 @@ void setup()
         dmpReady = true;
         packetSize = mpu.dmpGetFIFOPacketSize();
     }
+
     // 加速度/ジャイロセンサーの初期化。
-    double x = 0.0000000001;
-    double y = 0.0000000001;
-    double z = 0.0000000001;
+    const double x = 0.0000000001;
+    const double y = 0.0000000001;
+    const double z = 0.0000000001;
     for (int i_r = 0; i_r < 3; i_r++)
-    { // 重力加速度から角度を求める。
+    {
+        // 重力加速度から角度を求める。
         cleenarray3(kx_a, x);
         cleenarray3(kxa_a, x);
         cleenarray3(ky_a, y);
         cleenarray3(kz_a, z);
     }
+
     pinMode(MISO, OUTPUT);
     // turn on SPI in slave mode
     SPCR |= _BV(SPE);
@@ -348,7 +353,6 @@ ISR(SPI_STC_vect)
 
 void loop()
 {
-
     if (process_it)
     {
         buf[pos] = 0;
@@ -369,7 +373,10 @@ void loop()
     double k_m = 0;
     double h_m = 250;
     if (!dmpReady)
+    {
         return;
+    }
+
     while (!mpuInterrupt && fifoCount < packetSize)
     {
     }
@@ -455,12 +462,13 @@ void loop()
         vn1 = vn;
         rvn2 = rvn1;
         rvn1 = rvn;
-        double Real;
 
         if (country == 300)
         {
             v00 = vn;
         }
+
+        double Real;
 
         /* if(realaccel>0){
      Real = (realaccel*5)*(realaccel*5);
@@ -500,15 +508,15 @@ aayT = aay;
 aazT = aaz;*/
 
     gzz0 = gy[0];
-    if ((gzzz - gy[0]) > PI)
+    if ((gzzz - gy[0]) > M_PI)
     {
-        gztank += 2 * PI;
+        gztank += 2 * M_PI;
     }
-    if ((gy[0] - gzzz) > PI)
+    if ((gy[0] - gzzz) > M_PI)
     {
-        gztank += (-2) * PI;
+        gztank += (-2) * M_PI;
     }
-    gy[0] = gztank + gy[0];
+    gy[0] += gztank;
     gzzz = gzz0;
 
     /* Serial.print(vkx);
@@ -588,14 +596,14 @@ aazT = aaz;*/
 
     if (spi5 == spi6)
     {
-        //ptx = asin((double)spi5/1000*sin(MaxA/180*3.14));
-        ptx = ((double)spi5 * MaxA / 1000 + 2) / 180 * 3.14;
+        //ptx = asin((double)spi5/1000*sin(MaxA/180*M_PI));
+        ptx = ((double)spi5 * MaxA / 1000 + 2) / 180 * M_PI;
         ptx = ptx * 0.05 + ptxold * 0.95;
         ptxold = ptx;
     }
     if (spi3 == spi4)
     {
-        pty = (double)spi3 * MaxA / 1000 / 180 * 3.14;
+        pty = (double)spi3 * MaxA / 1000 / 180 * M_PI;
         pty = pty * 0.05 + ptyold * 0.95;
         ptyold = pty;
     }
@@ -749,10 +757,10 @@ void pidh(double array[], double a_m, double PB, double DT, double Td, double T)
 void flypower(double out1, double out2, double out3, double out4)
 {
     // 出力コード
-    int a1= out1;
+    int a1 = out1;
     int a2 = out2;
     int a3 = out3;
-    int a4= out4;
+    int a4 = out4;
     //a1の比較
     if (llow <= a1 <= hhigh)
     {
@@ -828,13 +836,13 @@ void getrp(double theta_a, double theta_b)
 {
     double A = tan(theta_a);
     double B = tan(theta_b);
-    double pic= atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
+    double pic = atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
     double ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
     double judge = 1 / (A * sin(-gy[0]) - cos(-gy[0])) * sin(ro);
     if (judge > 0)
     {
-        pic *=-1;
-        ro *=-1 ;
+        pic *= -1;
+        ro *= -1;
     }
     kxa_m = ro;
     kya_m = pic;
