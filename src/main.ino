@@ -190,7 +190,7 @@ int country = 0;
 int coucou = 0;
 int w = 0;
 int e;
-int spi1;
+int spi1;//ピンから送られてきた信号
 int spi2;
 int spi3;
 int spi4;
@@ -739,19 +739,16 @@ void pidh(double array[], double a_m, double PB, double DT, double Td, double T)
 void flypower(double out1, double out2, double out3, double out4)
 {
     // 出力コード
-    int a1;
-    int a2;
-    int a3;
-    int a4;
-    a1 = out1;
-    a2 = out2;
-    a3 = out3;
-    a4 = out4;
+    int a1= out1;
+    int a2 = out2;
+    int a3 = out3;
+    int a4= out4;
+    //a1の比較
     if (llow <= a1 <= hhigh)
     {
         rot1.writeMicroseconds(a1);
     }
-    if (llow > a1)
+    if (a1 < llow)
     {
         rot1.writeMicroseconds(llow);
     }
@@ -759,11 +756,12 @@ void flypower(double out1, double out2, double out3, double out4)
     {
         rot1.writeMicroseconds(hhigh);
     }
+    //a2の比較
     if (llow <= a2 <= hhigh)
     {
         rot2.writeMicroseconds(a2);
     }
-    if (llow > a2)
+    if (a2 < llow)
     {
         rot2.writeMicroseconds(llow);
     }
@@ -771,11 +769,12 @@ void flypower(double out1, double out2, double out3, double out4)
     {
         rot2.writeMicroseconds(hhigh);
     }
+    //a3の比較
     if (llow <= a3 <= hhigh)
     {
         rot3.writeMicroseconds(a3);
     }
-    if (llow > a3)
+    if (a3 < llow)
     {
         rot3.writeMicroseconds(llow);
     }
@@ -783,11 +782,12 @@ void flypower(double out1, double out2, double out3, double out4)
     {
         rot3.writeMicroseconds(hhigh);
     }
+    //a4の比較
     if (llow <= a4 <= hhigh)
     {
         rot4.writeMicroseconds(a4);
     }
-    if (llow > a4)
+    if (a4 < llow)
     {
         rot4.writeMicroseconds(llow);
     }
