@@ -152,12 +152,6 @@ double BPP = 520;
 //long fordd = 0;
 
 //double oldReal = 0;
-double kxa_m;
-double kya_m;
-int knt;
-int fpga = 0;
-int asd = 100;
-int asg = 100;
 char buf[100];
 int country = 0;
 int coucou = 0;
@@ -818,8 +812,6 @@ void getrp(double theta_a, double theta_b)
         pic *= -1;
         ro *= -1;
     }
-    kxa_m = ro;
-    kya_m = pic;
 }
 void getkgl(double f, double e, double d)
 {
