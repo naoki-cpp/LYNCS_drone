@@ -35,7 +35,7 @@
 #define chigh 400
 #define clow 0
 
-double ttt;
+//double ttt;
 //double ddd = 0;
 
 double ovh;
