@@ -106,8 +106,8 @@ double q8[3];
 double q9[3];
 double q10[3];
 
-double vx;
-double vy;
+//double vx;
+//double vy;
 double vz;
 double vn;
 double vn1 = 0;
@@ -422,9 +422,10 @@ void loop()
         aayT *= 0.000000001;
         aazT *= 0.000000001;
 
-        vx = A[0][0] * aaxT + A[0][1] * aayT + A[0][2] * aazT;
-        vy = A[1][0] * aaxT + A[1][1] * aayT + A[1][2] * aazT;
+        //vx = A[0][0] * aaxT + A[0][1] * aayT + A[0][2] * aazT;
+        //vy = A[1][0] * aaxT + A[1][1] * aayT + A[1][2] * aazT;
         vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
+
         timetime2 = micros();
         TIME = timetime2 - timetime1;
         timetime1 = timetime2;
@@ -689,15 +690,12 @@ void cleenarray3(double array[], double newdata)
 }
 void cal1(double f[3][3], double g[3][3])
 {
-    int i;
-    int j;
-    int t;
-    for (i = 0; i < 3; ++i)
+    for(int i = 0; i < 3; i++)
     {
-        for (j = 0; j < 3; ++j)
+        for (int j = 0; j < 3; ++j)
         {
             A[i][j] = 0;
-            for (t = 0; t < 3; ++t)
+            for (int t = 0; t < 3; ++t)
             {
                 A[i][j] += f[i][t] * g[t][j];
             }
