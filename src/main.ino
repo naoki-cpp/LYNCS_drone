@@ -38,7 +38,6 @@
 double ttt;
 //double ddd = 0;
 
-double P_k;
 double ovh;
 double nvh;
 double vh;
@@ -866,10 +865,9 @@ void getkgl(double f, double e, double d)
 
 void calman(double a, double y, double dt)
 {
-    double x_k;
-    x_k = xk + a * dt;
-    P_k = Pk + dt * dt * bv * bv;
-    
+    double x_k = xk + a * dt;
+    double P_k = Pk + dt * dt * bv * bv;
+
     gk = P_k / (P_k + cv * cv);
     xk = x_k + gk * (y - x_k);
     Pk = (1 - gk) * P_k;
