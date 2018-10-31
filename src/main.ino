@@ -152,11 +152,11 @@ double BPP = 520;
 //long fordd = 0;
 
 //double oldReal = 0;
+
 char buf[100];
 int country = 0;
 int coucou = 0;
-int w = 0;
-int e;
+//int w = 0;
 int spi1; //ピンから送られてきた信号
 int spi2;
 int spi3;
@@ -167,7 +167,6 @@ int spi7;
 int spi8;
 unsigned char cspi1;
 unsigned char cspi2;
-unsigned char c;
 volatile byte pos;
 volatile boolean process_it;
 bool dmpReady = false;  // set true if DMP init was successful
