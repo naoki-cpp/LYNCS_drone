@@ -434,7 +434,7 @@ void loop()
             v00 = vn;
         }
 
-        double Real;
+        //double Real;
 
         /* if(realaccel>0){
      Real = (realaccel*5)*(realaccel*5);
@@ -442,7 +442,7 @@ void loop()
   if(realaccel<0){
     Real = (-1)*(realaccel*5)*(realaccel*5);
     }*/
-        Real = realaccel * 5;
+        //Real = realaccel * 5;
         //   Real=0.1*Real+0.9*oldReal;
         //+  oldReal = Real;
 
@@ -477,11 +477,11 @@ aazT = aaz;*/
     gzz0 = gy[0];
     if ((gzzz - gy[0]) > M_PI)
     {
-        gztank += 2 * M_PI;
+        gztank += 2.0 * M_PI;
     }
     if ((gy[0] - gzzz) > M_PI)
     {
-        gztank += (-2) * M_PI;
+        gztank += (-2.0) * M_PI;
     }
     gy[0] += gztank;
     gzzz = gzz0;
@@ -665,7 +665,7 @@ if(ddd==1){
 
     //Serial.println(vp);
 
-    country = country + 1;
+    country++;
 }
 void cleenarray3(double array[], double newdata)
 {
