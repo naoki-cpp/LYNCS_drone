@@ -38,8 +38,7 @@
 //double ttt;
 //double ddd = 0;
 
-double ovh;
-double nvh;
+//double ovh;
 double vh;
 double gk;
 double xk;
