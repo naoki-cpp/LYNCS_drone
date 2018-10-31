@@ -156,7 +156,7 @@ double dpp = 0; //ppp=1000で１０度22ぐらむ
 int ppp1;
 int land = 0;
 double h_a[3];
-double h_m = 250;
+const double h_m = 250;
 int Alltimer1 = 0;
 int Alltimer2;
 long TIMET1 = 0;
@@ -370,8 +370,6 @@ void loop()
         process_it = false;
     }
 
-    double k_m = 0;
-    double h_m = 250;
     if (!dmpReady)
     {
         return;
