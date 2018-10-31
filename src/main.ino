@@ -253,37 +253,47 @@ void setup()
     oldypr[2] = 0;
     countx = 0;
     jo = 1;
+
     h_a[0] = 0;
     h_a[1] = h_m;
     h_a[2] = h_m;
+
     gy[0] = 0;
     gy[1] = 0;
     gy[2] = 0;
+
     gyv[0] = 0;
     gyv[1] = 0;
     gyv[2] = 0;
+
     kxa_a[0] = 0;
     kxa_a[1] = 0;
     kxa_a[2] = 0;
+
     kya_a[0] = 0;
     kya_a[1] = 0;
     kya_a[2] = 0;
     kv_a[0] = 0;
     kv_a[1] = 0;
     kv_a[2] = 0;
+
     rot1.attach(Out1);
     rot2.attach(Out2);
     rot3.attach(Out3);
     rot4.attach(Out4);
+
     pinMode(Out1, OUTPUT);
     pinMode(Out2, OUTPUT);
     pinMode(Out3, OUTPUT);
     pinMode(Out4, OUTPUT);
+
     pinMode(echoPin, INPUT);
     pinMode(trigPin, OUTPUT);
+
     Wire.begin();
     Wire.setClock(400000L);
     Serial.begin(115200);
+    
     while (!Serial);
 
     mpu.initialize();
