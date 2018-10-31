@@ -135,10 +135,6 @@ double buffer1[3][3];
 int land = 0;
 double h_a[3];
 const double h_m = 250;
-int Alltimer1 = 0;
-int Alltimer2;
-long TIMET1 = 0;
-long TIMET2 = 0;
 
 double v00;
 double vp = 0;
@@ -151,11 +147,11 @@ double ptyold = 0;
 double ptz = 0;
 double ptzold = 0;
 double BPP = 520;
-long ford1 = 0;
-long ford2 = 0;
-long fordd = 0;
+//long ford1 = 0;
+//long ford2 = 0;
+//long fordd = 0;
 
-double oldReal = 0;
+//double oldReal = 0;
 double kxa_m;
 double kya_m;
 int knt;
