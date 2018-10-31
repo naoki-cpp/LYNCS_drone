@@ -58,6 +58,7 @@ long int intypr[3];
 double aaxT;
 double aayT;
 double aazT;
+/*
 double qx1 = -0.001;
 double qx2 = 0.93;
 double qx3 = 0.003;
@@ -88,7 +89,7 @@ double qz7 = -0.03;
 double qz8 = -0.03;
 double qz9 = 0.009;
 double qz10 = 0.99;
-
+*/
 double q1[3];
 double q2[3];
 double q3[3];
