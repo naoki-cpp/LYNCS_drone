@@ -46,9 +46,6 @@ double Pk;
 double oldr;
 double realaccel;
 
-double oldaax = 0;
-double oldaay = 0;
-double oldaaz = 0;
 double oldypr[3];
 
 double aax;
@@ -492,6 +489,7 @@ void loop()
         //Serial.println(vh);
         // vh=(nvh-ovh)/TIME*100000;
         //ovh=nvh;
+
         vh = 0.1 * vh + 0.9 * oldr;
         oldr = vh;
 
