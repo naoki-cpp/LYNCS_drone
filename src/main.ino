@@ -127,6 +127,7 @@ unsigned char cspi1;
 unsigned char cspi2;
 volatile byte pos;
 volatile boolean process_it;
+//mpu cotrol /status vars. see http://invent.module143.com/mpu6050-how-to-use-it/
 bool dmpReady = false;  // set true if DMP init was successful
 uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
 uint8_t devStatus;      // return status after each device operation (0 = success, !0 = error)
@@ -134,11 +135,11 @@ uint16_t packetSize;    // expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;     // count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 Quaternion q;
-VectorInt16 aa;     // [x, y, z]            加速度センサの測定値
-VectorInt16 aaReal; // [x, y, z]            重力を除いた加速度センサの測定値
-VectorInt16 aaWorld;
-VectorFloat gravity; // [x, y, z]      gravity vector
-VectorInt16 gyro;    // [x, y, z]      gravity vector
+VectorInt16 aa;					// [x, y, z]            加速度センサの測定値
+VectorInt16 aaReal;			// [x, y, z]            重力を除いた加速度センサの測定値
+VectorInt16 aaWorld;	// [x, y, z]            world-frame accel sensor measurements
+VectorFloat gravity; 		// [x, y, z]      gravity vector
+VectorInt16 gyro;    		// [x, y, z]      gravity vector
 float ypr[3];
 double A[3][4];
 double v;
