@@ -38,6 +38,7 @@ LYNCS Drone Project 2018
 #define MaxA 5
 #define chigh 400
 #define clow 0
+#define GRAVITATIONAL_ACCELERATION  9.8
 
 double vh;
 double gk;
@@ -360,7 +361,7 @@ void loop()
         double delta_time_micro_second = time_update();          //前回loopが呼ばれてから今loopが呼ばれるまでの時間 us単位
         double delta_time_second = delta_time_micro_second / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
-        rvn = rvn1 + (vz - 1) * 9.8 * delta_time_second;
+        rvn = rvn1 + (vz - 1) * GRAVITATIONAL_ACCELERATION * delta_time_second;
 
         //vn = rvn;
         vn = (rvn * we - rvn2 * we - (delta_time_second / 2 * wh - 1) * (we - 2 / delta_time_second) * vn2 - ((delta_time_second / 2 * wh - 1) * (2 / delta_time_second + we) + (we - 2 / delta_time_second) * (1 + delta_time_second / 2 * wh)) * vn1) / (1 + delta_time_second / 2 * wh) / (2 / delta_time_second + we);
