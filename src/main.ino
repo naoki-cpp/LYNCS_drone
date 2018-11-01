@@ -164,6 +164,7 @@ void flypower();
 void getrp(double theta_a, double theta_b);
 void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
 void gppid(double array[], double a_m, double PB, double DT, double Td, double T);
+double time_update();
 //MS5xxx sensor(&Wire);
 void setup()
 {
@@ -356,19 +357,13 @@ void loop()
         //vy = A[1][0] * aaxT + A[1][1] * aayT + A[1][2] * aazT;
         vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
 
-        static double previous_time; //前回loopが呼ばれた時間
-        static double TIME;          //前回loopが呼ばれてから今loopが呼ばれるまでの時間
-        {
-            double temp_time = micros();
-            TIME = temp_time - previous_time;
-            previous_time = temp_time;
-        }
-        double TIMEr = TIME / 1000000;
+        double delta_time_micro_second = time_update();          //前回loopが呼ばれてから今loopが呼ばれるまでの時間 us単位
+        double delta_time_second = delta_time_micro_second / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
-        rvn = rvn1 + (vz - 1) * 9.8 * TIMEr;
+        rvn = rvn1 + (vz - 1) * 9.8 * delta_time_second;
 
         //vn = rvn;
-        vn = (rvn * we - rvn2 * we - (TIMEr / 2 * wh - 1) * (we - 2 / TIMEr) * vn2 - ((TIMEr / 2 * wh - 1) * (2 / TIMEr + we) + (we - 2 / TIMEr) * (1 + TIMEr / 2 * wh)) * vn1) / (1 + TIMEr / 2 * wh) / (2 / TIMEr + we);
+        vn = (rvn * we - rvn2 * we - (delta_time_second / 2 * wh - 1) * (we - 2 / delta_time_second) * vn2 - ((delta_time_second / 2 * wh - 1) * (2 / delta_time_second + we) + (we - 2 / delta_time_second) * (1 + delta_time_second / 2 * wh)) * vn1) / (1 + delta_time_second / 2 * wh) / (2 / delta_time_second + we);
         vn2 = vn1;
         vn1 = vn;
         rvn2 = rvn1;
@@ -391,7 +386,7 @@ void loop()
         vh = 0.1 * vh + 0.9 * oldr;
         oldr = vh;
 
-        calman(vn, vh, TIME / 1000000);
+        calman(vn, vh, delta_time_micro_second / 1000000);
     }
 
     gzz0 = gy[0];
@@ -545,6 +540,13 @@ void cal1(double f[3][3], double g[3][3])
             }
         }
     }
+}
+double time_update(){
+    static double previous_time = micros(); //前回この関数が呼ばれた時間 
+    double temp_time = micros();
+    double return_time = temp_time - previous_time;
+    previous_time = temp_time;
+    return return_time;
 }
 void pidx(double array[], double a_m, double PB, double DT, double Td, double T)
 {
