@@ -39,10 +39,6 @@ LYNCS Drone Project 2018
 #define chigh 400
 #define clow 0
 
-//double ttt;
-//double ddd = 0;
-
-//double ovh;
 double vh;
 double gk;
 double xk;
@@ -147,7 +143,6 @@ double vv;
 double y0;
 double y1;
 double y2;
-double TIME;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 long curMicros;
 char jo;
@@ -363,16 +358,16 @@ void loop()
         vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
 
         static double previous_time;//前回loopが呼ばれた時間
+        static double TIME;//前回loopが呼ばれてから今loopが呼ばれるまでの時間
         {
              double temp_time = micros();
             TIME = temp_time - previous_time;
             previous_time = temp_time;
         }
-       
-
-        rvn = rvn1 + (vz - 1) * 9.8 * TIME / 1000000;
-
         double TIMEr = TIME / 1000000;
+
+        rvn = rvn1 + (vz - 1) * 9.8 * TIMEr;
+
         //vn = rvn;
         vn = (rvn * we - rvn2 * we - (TIMEr / 2 * wh - 1) * (we - 2 / TIMEr) * vn2 - ((TIMEr / 2 * wh - 1) * (2 / TIMEr + we) + (we - 2 / TIMEr) * (1 + TIMEr / 2 * wh)) * vn1) / (1 + TIMEr / 2 * wh) / (2 / TIMEr + we);
         vn2 = vn1;
