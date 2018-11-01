@@ -1,3 +1,9 @@
+/*
+                    LYNCS drone project
+                    2018
+                    The latest version of this script is here
+                    https://github.com/naoki-cpp/LYNCS_drone
+*/
 #include <Servo.h>
 #include <MPU6050_6Axis_MotionApps20.h>
 //各サーボモータに割り当てるピンの定義
