@@ -260,7 +260,7 @@ void setup()
 
 ISR(SPI_STC_vect)
 {
-    byte c = SPDR; 
+    byte c = SPDR;
     // grab byte from SPI Data Register
     // add to buffer if room
     if (pos < sizeof buf)
@@ -319,7 +319,7 @@ void loop()
         mpu.dmpGetGravity(&gravity, &q);
 
         mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
-        
+
         gy[0] = (double)ypr[0];
         gy[1] = (double)ypr[1];
         gy[2] = (double)ypr[2];
@@ -332,7 +332,6 @@ void loop()
         gyv[0] = (double)gyro.x;
         gyv[1] = (double)gyro.y;
         gyv[2] = (double)gyro.z;
-        
 
         getkgl((double)y0, (double)y1, (double)y2);
         aax = (double)aa.x / 7600;
@@ -357,10 +356,10 @@ void loop()
         //vy = A[1][0] * aaxT + A[1][1] * aayT + A[1][2] * aazT;
         vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
 
-        static double previous_time;//前回loopが呼ばれた時間
-        static double TIME;//前回loopが呼ばれてから今loopが呼ばれるまでの時間
+        static double previous_time; //前回loopが呼ばれた時間
+        static double TIME;          //前回loopが呼ばれてから今loopが呼ばれるまでの時間
         {
-             double temp_time = micros();
+            double temp_time = micros();
             TIME = temp_time - previous_time;
             previous_time = temp_time;
         }
@@ -388,7 +387,7 @@ void loop()
         {
             vh = (double)spi8 / 1000;
         }
-        
+
         vh = 0.1 * vh + 0.9 * oldr;
         oldr = vh;
 
@@ -665,7 +664,6 @@ void getrp(double theta_a, double theta_b)
     if (judge > 0)
     {
         pic *= -1;
-        ro *= -1;
     }
 }
 void getkgl(double f, double e, double d)
@@ -696,7 +694,7 @@ void calman(double a, double y, double dt)
     Pk = (1 - gk) * P_k;
     realaccel = xk;
 }
-float getHeight(float temperature, float pressure, float sPressure)
+/*float getHeight(float temperature, float pressure, float sPressure)
 {
     return pow(1013.25 / sPressure, 1 / 5.256) * (pow(sPressure / pressure, 1 / 5.256) - 1.0) * (temperature + 273.15) / 0.0065;
-}
+}*/
