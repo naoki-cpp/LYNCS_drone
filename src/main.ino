@@ -69,7 +69,9 @@ double rvn2 = 0;
 double we = 1600;
 double wh = 2;
 
-MPU6050 mpu;
+MPU6050 mpu;// MPU-6050 ジャイロスコープ・加速度センサのオブジェクト
+
+//サーボモーターのオブジェクト
 Servo rot1;
 Servo rot2;
 Servo rot3;
@@ -198,12 +200,12 @@ void setup()
     kv_a[0] = 0;
     kv_a[1] = 0;
     kv_a[2] = 0;
-
+    //モーターのピン割当
     rot1.attach(Out1);
     rot2.attach(Out2);
     rot3.attach(Out3);
     rot4.attach(Out4);
-
+    //ピンモードの設定
     pinMode(Out1, OUTPUT);
     pinMode(Out2, OUTPUT);
     pinMode(Out3, OUTPUT);
