@@ -69,7 +69,6 @@ double vn2 = 0;
 double rvn;
 double rvn1 = 0;
 double rvn2 = 0;
-double TIMEr;
 double we = 1600;
 double wh = 2;
 
@@ -280,7 +279,6 @@ ISR(SPI_STC_vect)
 
 void loop()
 {
-    static double previous_time//前回loopが呼ばれた時間
     //初回のみ実行
     if (process_it)
     {
@@ -363,15 +361,18 @@ void loop()
         //vx = A[0][0] * aaxT + A[0][1] * aayT + A[0][2] * aazT;
         //vy = A[1][0] * aaxT + A[1][1] * aayT + A[1][2] * aazT;
         vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
-        
-        double temp_time = micros();
-        TIME = temp_time - previous_time;
-        previous_time = temp_time;
-        
+
+        static double previous_time;//前回loopが呼ばれた時間
+        {
+             double temp_time = micros();
+            TIME = temp_time - previous_time;
+            previous_time = temp_time;
+        }
+       
 
         rvn = rvn1 + (vz - 1) * 9.8 * TIME / 1000000;
-        TIMEr = TIME / 1000000;
 
+        double TIMEr = TIME / 1000000;
         //vn = rvn;
         vn = (rvn * we - rvn2 * we - (TIMEr / 2 * wh - 1) * (we - 2 / TIMEr) * vn2 - ((TIMEr / 2 * wh - 1) * (2 / TIMEr + we) + (we - 2 / TIMEr) * (1 + TIMEr / 2 * wh)) * vn1) / (1 + TIMEr / 2 * wh) / (2 / TIMEr + we);
         vn2 = vn1;
