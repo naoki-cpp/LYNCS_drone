@@ -150,7 +150,7 @@ void pidy_a(double, double, double, double, double, double);
 void change(double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo& rot1,Servo& rot2,Servo& rot3,Servo& rot4);
-void flypower();
+void flypower(int out1,int out2,int out3, int out4);
 void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
 void gppid(double array[], double a_m, double PB, double DT, double Td, double T);
 double time_update();
@@ -569,62 +569,58 @@ void pidh(double array[], double a_m, double PB, double DT, double Td, double T)
     vv = vv + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
     v = PB * (a_m - array[2]) + vv;
 }
-void flypower(double out1, double out2, double out3, double out4)
+void flypower(int out1, int out2,int out3,int out4)
 {
     // 出力コード
-    int a1 = out1;
-    int a2 = out2;
-    int a3 = out3;
-    int a4 = out4;
-    //a1の比較
-    if (llow <= a1 <= hhigh)
+    //out1の比較
+    if (llow <= out1 <= hhigh)
     {
-        rot1.writeMicroseconds(a1);
+        rot1.writeMicroseconds(out1);
     }
-    if (a1 < llow)
+    if (out1 < llow)
     {
         rot1.writeMicroseconds(llow);
     }
-    if (hhigh < a1)
+    if (hhigh < out1)
     {
         rot1.writeMicroseconds(hhigh);
     }
-    //a2の比較
-    if (llow <= a2 <= hhigh)
+    //out2の比較
+    if (llow <= out2 <= hhigh)
     {
-        rot2.writeMicroseconds(a2);
+        rot2.writeMicroseconds(out2);
     }
-    if (a2 < llow)
+    if (out2 < llow)
     {
         rot2.writeMicroseconds(llow);
     }
-    if (hhigh < a2)
+    if (hhigh < out2)
     {
         rot2.writeMicroseconds(hhigh);
     }
-    //a3の比較
-    if (llow <= a3 <= hhigh)
+    //out3の比較
+    if (llow <= out3 <= hhigh)
     {
-        rot3.writeMicroseconds(a3);
+        rot3.writeMicroseconds(out3);
     }
-    if (a3 < llow)
+    if (out3 < llow)
     {
         rot3.writeMicroseconds(llow);
     }
-    if (hhigh < a3)
+    if (hhigh < out3)
     {
         rot3.writeMicroseconds(hhigh);
     }
-    //a4の比較
-    if (llow <= a4 <= hhigh)
+    //out4の比較
+    if (llow <= out4 <= hhigh)
     {
-        rot4.writeMicroseconds(a4);
+        rot4.writeMicroseconds(out4);
     }
-    if (a4 < llow)
+    if (out4 < llow)
     {
         rot4.writeMicroseconds(llow);
     }
-    if (hhigh < a4)
+    if (hhigh < out4)
     {
         rot4.writeMicroseconds(hhigh);
     }
