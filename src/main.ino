@@ -92,9 +92,7 @@ double v00;
 double vp = 0;
 double center = 0;
 double ptx = 0;
-double ptxold = 0;
 double pty = 0;
-double ptyold = 0;
 double ptz = 0;
 double ptzold = 0;
 double BPP = 520;
@@ -458,15 +456,18 @@ void loop()
 	center = center * 0.2 + centerold * 0.8;
 	centerold = center;
 
+	static double ptxold = 0;
 	if (spi5 == spi6)
 	{
 		ptx = ((double)spi5 * MaxA / 1000 + 2) / 180 * M_PI;
 		ptx = ptx * 0.05 + ptxold * 0.95;
 		ptxold = ptx;
 	}
+	static double ptyold = 0;
 	if (spi3 == spi4)
 	{
 		pty = (double)spi3 * MaxA / 1000 / 180 * M_PI;
+
 		pty = pty * 0.05 + ptyold * 0.95;
 		ptyold = pty;
 	}
