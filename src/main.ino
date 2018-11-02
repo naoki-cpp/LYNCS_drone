@@ -11,6 +11,9 @@ LYNCS Drone Project 2018
 //#include <MS5xxx.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+/*===========================
+===       DEFINITIONS     ===
+=============================*/
 #define bv 0.05745024
 #define cv 0.009521774
 
@@ -531,13 +534,12 @@ void cal1(double f[3][3], double g[3][3])
 		}
 	}
 }
-double time_update()
-{
-	static double previous_time = micros(); //前回この関数が呼ばれた時間
-	double temp_time = micros();
-	double return_time = temp_time - previous_time;
-	previous_time = temp_time;
-	return return_time;
+double time_update(){
+    static double previous_time = micros(); //前回この関数が呼ばれた時間
+    double temp_time = micros();
+    double return_time = temp_time - previous_time;
+    previous_time = temp_time;
+    return return_time;
 }
 void pidx(double array[], double a_m, double PB, double DT, double Td, double T)
 {
