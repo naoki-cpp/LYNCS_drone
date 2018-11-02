@@ -95,7 +95,6 @@ double kza_a[3];
 double kv_a[3];
 double gy[3];
 double gyv[3];
-double buffer1[3][3];
 int land = 0;
 double h_a[3];
 const double h_m = 250;
@@ -674,6 +673,7 @@ void getrp(double theta_a, double theta_b)
 }
 void getkgl(double f, double e, double d)
 {
+	static double buffer1[3][3];
     double a[3][3] = {{1, 0, 0}, {0, cos(d), -1 * sin(d)}, {0, sin(d), cos(d)}};
     double b[3][3] = {{cos(e), 0, sin(e)}, {0, 1, 0}, {-sin(e), 0, cos(e)}};
     double c[3][3] = {{cos(f), -1 * sin(f), 0}, {sin(f), cos(f), 0}, {0, 0, 1}};
