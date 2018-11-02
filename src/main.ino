@@ -48,14 +48,6 @@ double oldr;
 double realaccel;
 
 double oldypr[3];
-
-double aax;
-double aay;
-double aaz;
-long int intaax;
-long int intaay;
-long int intaaz;
-long int intypr[3];
 double aaxT;
 double aayT;
 double aazT;
@@ -338,13 +330,15 @@ void loop()
         gyv[2] = (double)gyro.z;
 
         getkgl((double)y0, (double)y1, (double)y2);
-        aax = (double)aa.x / 7600;
-        aay = (double)aa.y / 8000;
-        aaz = (double)aa.z / 10200;
+		double aax = (double)aa.x / 7600;
+		double aay = (double)aa.y / 8000;
+		double aaz = (double)aa.z / 10200;
 
-        intaax = (long int)(aax * 1000);
-        intaay = (long int)(aay * 1000);
-        intaaz = (long int)(aaz * 1000);
+		long int intaax = (long int)(aax * 1000);
+		long int intaay = (long int)(aay * 1000);
+		long int intaaz = (long int)(aaz * 1000);
+
+		long int intypr[3];
         intypr[0] = (long int)(ypr[0] * 1000);
         intypr[1] = (long int)(ypr[1] * 1000);
         intypr[2] = (long int)(ypr[2] * 1000);
