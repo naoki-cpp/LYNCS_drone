@@ -133,7 +133,6 @@ double y0;
 double y1;
 double y2;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
-long curMicros;
 char jo;
 
 void dmpDataReady()
