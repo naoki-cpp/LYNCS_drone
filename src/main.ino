@@ -44,7 +44,6 @@ double vh;
 double gk;
 double xk;
 double Pk;
-double oldr;
 double realaccel;
 
 double oldypr[3];
@@ -94,7 +93,6 @@ const double h_m = 250;
 double v00;
 double vp = 0;
 double center = 0;
-double centerold = 0;
 double ptx = 0;
 double ptxold = 0;
 double pty = 0;
@@ -380,6 +378,7 @@ void loop()
             vh = (double)spi8 / 1000;
         }
 
+		static double oldr;
         vh = 0.1 * vh + 0.9 * oldr;
         oldr = vh;
 
@@ -457,6 +456,7 @@ void loop()
         }
     }
 
+	double centerold = 0;
     center = center * 0.2 + centerold * 0.8;
     centerold = center;
 
