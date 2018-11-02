@@ -1,7 +1,9 @@
-/*
-LYNCS Drone Project 2018
----------------------------------------------------------------
-*/
+/*================================================================
+                    LYNCS drone project
+                    2018
+                    The latest version of this script is here
+                    https://github.com/naoki-cpp/LYNCS_drone
+==================================================================*/
 #include <math.h>
 #include <stdio.h>
 
@@ -42,7 +44,9 @@ LYNCS Drone Project 2018
 #define chigh 400
 #define clow 0
 #define GRAVITATIONAL_ACCELERATION 9.8
-
+/*==========================================================
+	===						GLOBAL VARIABLES			===
+============================================================*/
 double vh;
 double gk;
 double xk;
@@ -139,11 +143,9 @@ double y1;
 double y2;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 char jo;
-
-void dmpDataReady()
-{
-	mpuInterrupt = true;
-}
+/*=========================================================
+	===						FUNCTIONS						===
+ ==========================================================*/
 void cal1(double f[3][3], double g[3][3]);
 void cleenarray3(double array[], double newdata);
 void pidx(double array[], double a_m, double PB, double DT, double Td, double T);
@@ -155,6 +157,31 @@ void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
 double time_update();
 //MS5xxx sensor(&Wire);
+// ================================================================
+// ===               INTERRUPT DETECTION ROUTINE                ===
+// ================================================================
+
+void dmpDataReady()
+{
+	mpuInterrupt = true;
+}
+
+ISR(SPI_STC_vect)
+{
+	byte c = SPDR;
+	// grab byte from SPI Data Register
+	// add to buffer if room
+	if (pos < sizeof buf)
+	{
+		buf[pos++] = c;
+		// example: newline means time to process buffer
+		if (c == '\n')
+			process_it = true;
+	} // end of room available
+}
+// ================================================================
+// ===                      INITIAL SETUP                       ===
+// ================================================================
 void setup()
 {
 	oldypr[0] = 0;
@@ -247,21 +274,9 @@ void setup()
 	delay(5000);
 	calibration(rot1, rot2, rot3, rot4);
 }
-
-ISR(SPI_STC_vect)
-{
-	byte c = SPDR;
-	// grab byte from SPI Data Register
-	// add to buffer if room
-	if (pos < sizeof buf)
-	{
-		buf[pos++] = c;
-		// example: newline means time to process buffer
-		if (c == '\n')
-			process_it = true;
-	} // end of room available
-}
-
+/*=================================================================
+		====						MAIN PROGRAM LOOP			===
+===================================================================*/
 void loop()
 {
 	//ISRが呼ばれたら実行
