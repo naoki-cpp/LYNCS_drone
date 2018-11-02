@@ -154,7 +154,6 @@ void change(double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo& rot1,Servo& rot2,Servo& rot3,Servo& rot4);
 void flypower();
-void getrp(double theta_a, double theta_b);
 void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
 void gppid(double array[], double a_m, double PB, double DT, double Td, double T);
 double time_update();
@@ -652,18 +651,6 @@ void calibration(Servo& rot1,Servo& rot2,Servo& rot3,Servo& rot4)
     delay(2000);
     delay(1000);
     Serial.println("start");
-}
-void getrp(double theta_a, double theta_b)
-{
-    double A = tan(theta_a);
-    double B = tan(theta_b);
-    double pic = atan((A * cos(-gy[0]) + sin(-gy[0])) / B / sqrt(A * A + 1));
-    double ro = atan((A * sin(-gy[0]) - cos(-gy[0])) / (A * cos(-gy[0]) + sin(-gy[0])) * sin(pic));
-    double judge = 1 / (A * sin(-gy[0]) - cos(-gy[0])) * sin(ro);
-    if (judge > 0)
-    {
-        pic *= -1;
-    }
 }
 void getkgl(double f, double e, double d)
 {
