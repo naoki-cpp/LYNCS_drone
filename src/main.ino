@@ -278,7 +278,7 @@ ISR(SPI_STC_vect)
 
 void loop()
 {
-    //初回のみ実行
+    //ISRが呼ばれたら実行
     if (process_it)
     {
         buf[pos] = 0;
