@@ -150,7 +150,6 @@ void pidx(double array[], double a_m, double PB, double DT, double Td, double T)
 void pidy(double array[], double a_m, double PB, double DT, double Td, double T);
 void pidz(double array[], double a_m, double PB, double DT, double Td, double T);
 void pidy_a(double, double, double, double, double, double);
-void change(double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
