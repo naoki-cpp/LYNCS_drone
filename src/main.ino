@@ -56,8 +56,8 @@ double vn2 = 0;
 double rvn;
 double rvn1 = 0;
 double rvn2 = 0;
-double we = 1600;
-double wh = 2;
+const double we = 1600;
+const double wh = 2;
 
 MPU6050 mpu; // MPU-6050 ジャイロスコープ・加速度センサのオブジェクト
 
