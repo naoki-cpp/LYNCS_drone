@@ -126,7 +126,7 @@ VectorInt16 aaReal;			// [x, y, z]            重力を除いた加速度セン�
 VectorInt16 aaWorld;	// [x, y, z]            world-frame accel sensor measurements
 VectorFloat gravity; 		// [x, y, z]      gravity vector
 VectorInt16 gyro;    		// [x, y, z]      gravity vector
-float ypr[3];
+float yaw_pitch_roll[3];
 double A[3][4];
 double v;
 double vv;
@@ -308,14 +308,14 @@ void loop()
         mpu.dmpGetAccel(&aa, fifoBuffer);
         mpu.dmpGetGravity(&gravity, &q);
 
-        mpu.dmpGetYawPitchRoll(ypr, &q, &gravity);
+        mpu.dmpGetYawPitchRoll(yaw_pitch_roll, &q, &gravity);
 
-        gy[0] = (double)ypr[0];
-        gy[1] = (double)ypr[1];
-        gy[2] = (double)ypr[2];
-        y0 = (-1) * ypr[0];
-        y1 = (-1) * ypr[1];
-        y2 = ypr[2];
+        gy[0] = (double)yaw_pitch_roll[0];
+        gy[1] = (double)yaw_pitch_roll[1];
+        gy[2] = (double)yaw_pitch_roll[2];
+        y0 = (-1) * yaw_pitch_roll[0];
+        y1 = (-1) * yaw_pitch_roll[1];
+        y2 = yaw_pitch_roll[2];
 
         mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -333,9 +333,9 @@ void loop()
 		long int intaaz = (long int)(aaz * 1000);
 
 		long int intypr[3];
-        intypr[0] = (long int)(ypr[0] * 1000);
-        intypr[1] = (long int)(ypr[1] * 1000);
-        intypr[2] = (long int)(ypr[2] * 1000);
+        intypr[0] = (long int)(yaw_pitch_roll[0] * 1000);
+        intypr[1] = (long int)(yaw_pitch_roll[1] * 1000);
+        intypr[2] = (long int)(yaw_pitch_roll[2] * 1000);
 		
         double aaxT = (double)((-1) * intypr[0] * 1000 + 930 * intypr[1] * 1000 + 3 * intypr[2] * 1000 + 3 * intypr[1] * intypr[1] + (-4) * intypr[2] * intypr[2] + 10 * intypr[0] * intypr[1] + 4 * intypr[1] * intypr[2] + 3 * intypr[0] * intypr[2] + 10 * intaax * 1000);
         double aayT = (double)(9 * intypr[0] * 1000 + (-20) * intypr[1] * 1000 + 940 * intypr[2] * 1000 + (-40) * intypr[1] * intypr[1] + (-30) * intypr[2] * intypr[2] + 30 * intypr[0] * intypr[1] + 40 * intypr[1] * intypr[2] + (-30) * intypr[0] * intypr[2] + 7 * intaay * 1000);
