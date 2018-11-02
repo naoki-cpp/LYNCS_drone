@@ -123,12 +123,17 @@ uint16_t packetSize;	// expected DMP packet size (default is 42 bytes)
 uint16_t fifoCount;		// count of all bytes currently in FIFO
 uint8_t fifoBuffer[64]; // FIFO storage buffer
 Quaternion q;			//[x,y,z,w]			quaternion
-VectorInt16 aa;			// [x, y, z]            加速度センサの測定値
-VectorInt16 aaReal;		// [x, y, z]            重力を除いた加速度センサの測定値
-VectorInt16 aaWorld;	// [x, y, z]            world-frame accel sensor measurements
+VectorInt16 acceleration_measured;			// [x, y, z]            加速度センサの測定値
+VectorInt16 acceleration_without_gravity;		// [x, y, z]            重力を除いた加速度センサの測定値
+VectorInt16 acceleration_world;	// [x, y, z]            world-frame accel sensor measurements
 VectorFloat gravity;	// [x, y, z]      gravity vector
-VectorInt16 gyro;		// [x, y, z]      gravity vector
+VectorInt16 gyro;		// [x, y, z]      gyro vector
 float yaw_pitch_roll[3];
+enum YAW_PITCH_ROLL{
+YAW = 0,
+PITCH,
+ROLL
+}
 double A[3][4];
 double v;
 double vv;
@@ -306,17 +311,17 @@ void loop()
 		mpu.getFIFOBytes(fifoBuffer, packetSize);
 		fifoCount -= packetSize;
 		mpu.dmpGetQuaternion(&q, fifoBuffer);
-		mpu.dmpGetAccel(&aa, fifoBuffer);
+		mpu.dmpGetAccel(&acceleration_measured, fifoBuffer);
 		mpu.dmpGetGravity(&gravity, &q);
 
 		mpu.dmpGetYawPitchRoll(yaw_pitch_roll, &q, &gravity);
 
-		gy[0] = (double)yaw_pitch_roll[0];
-		gy[1] = (double)yaw_pitch_roll[1];
-		gy[2] = (double)yaw_pitch_roll[2];
-		y0 = (-1) * yaw_pitch_roll[0];
-		y1 = (-1) * yaw_pitch_roll[1];
-		y2 = yaw_pitch_roll[2];
+		gy[YAW] = (double)yaw_pitch_roll[YAW];
+		gy[PITCH] = (double)yaw_pitch_roll[PITCH];
+		gy[ROLL] = (double)yaw_pitch_roll[ROLL];
+		y0 = (-1) * yaw_pitch_roll[YAW];
+		y1 = (-1) * yaw_pitch_roll[PITCH];
+		y2 = yaw_pitch_roll[ROLL];
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -325,9 +330,9 @@ void loop()
 		gyv[2] = (double)gyro.z;
 
 		getkgl((double)y0, (double)y1, (double)y2);
-		double aax = (double)aa.x / 7600;
-		double aay = (double)aa.y / 8000;
-		double aaz = (double)aa.z / 10200;
+		double aax = (double)acceleration_measured.x / 7600;
+		double aay = (double)acceleration_measured.y / 8000;
+		double aaz = (double)acceleration_measured.z / 10200;
 
 		long int intaax = (long int)(aax * 1000);
 		long int intaay = (long int)(aay * 1000);
