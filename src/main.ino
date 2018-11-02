@@ -47,7 +47,6 @@ double vh;
 double gk;
 double xk;
 double Pk;
-double realaccel;
 
 double oldypr[3];
 double vz;
@@ -133,7 +132,7 @@ enum YAW_PITCH_ROLL{
 YAW = 0,
 PITCH,
 ROLL
-}
+};
 double A[3][4];
 double v;
 double vv;
@@ -157,8 +156,6 @@ void change(double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
-void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
-void gppid(double array[], double a_m, double PB, double DT, double Td, double T);
 double time_update();
 //MS5xxx sensor(&Wire);
 void setup()
@@ -677,7 +674,6 @@ void calman(double a, double y, double dt)
 	gk = P_k / (P_k + cv * cv);
 	xk = x_k + gk * (y - x_k);
 	Pk = (1 - gk) * P_k;
-	realaccel = xk;
 }
 /*float getHeight(float temperature, float pressure, float sPressure)
 {
