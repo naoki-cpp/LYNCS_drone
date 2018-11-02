@@ -152,7 +152,7 @@ void pidz(double array[], double a_m, double PB, double DT, double Td, double T)
 void pidy_a(double, double, double, double, double, double);
 void change(double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
-void calibration();
+void calibration(Servo& rot1,Servo& rot2,Servo& rot3,Servo& rot4);
 void flypower();
 void getrp(double theta_a, double theta_b);
 void cmpid(double array[], double a_m, double PB, double DT, double Td, double T);
@@ -249,7 +249,7 @@ void setup()
     // now turn on interrupts
     SPI.attachInterrupt();
     delay(5000);
-    calibration();
+    calibration(rot1,rot2,rot3,rot4);
 }
 
 ISR(SPI_STC_vect)
@@ -635,7 +635,7 @@ void flypower(double out1, double out2, double out3, double out4)
         rot4.writeMicroseconds(hhigh);
     }
 }
-void calibration()
+void calibration(Servo& rot1,Servo& rot2,Servo& rot3,Servo& rot4)
 {
     // キャリブレーションコード
     Serial.println("initiation");
