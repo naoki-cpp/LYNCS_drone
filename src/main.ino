@@ -113,23 +113,24 @@ unsigned char cspi2;
 volatile byte pos;
 volatile boolean process_it;
 //mpu cotrol /status vars. see http://invent.module143.com/mpu6050-how-to-use-it/
-bool dmpReady = false;  // set true if DMP init was successful
-uint8_t mpuIntStatus;   // holds actual interrupt status byte from MPU
-uint8_t devStatus;		// return status after each device operation (0 = success, !0 = error)
-uint16_t packetSize;	// expected DMP packet size (default is 42 bytes)
-uint16_t fifoCount;		// count of all bytes currently in FIFO
-uint8_t fifoBuffer[64]; // FIFO storage buffer
-Quaternion q;			//[x,y,z,w]			quaternion
-VectorInt16 acceleration_measured;			// [x, y, z]            加速度センサの測定値
-VectorInt16 acceleration_without_gravity;		// [x, y, z]            重力を除いた加速度センサの測定値
-VectorInt16 acceleration_world;	// [x, y, z]            world-frame accel sensor measurements
-VectorFloat gravity;	// [x, y, z]      gravity vector
-VectorInt16 gyro;		// [x, y, z]      gyro vector
+bool dmpReady = false;					  // set true if DMP init was successful
+uint8_t mpuIntStatus;					  // holds actual interrupt status byte from MPU
+uint8_t devStatus;						  // return status after each device operation (0 = success, !0 = error)
+uint16_t packetSize;					  // expected DMP packet size (default is 42 bytes)
+uint16_t fifoCount;						  // count of all bytes currently in FIFO
+uint8_t fifoBuffer[64];					  // FIFO storage buffer
+Quaternion quaternion;					  //[x,y,z,w]			quaternion
+VectorInt16 acceleration_measured;		  // [x, y, z]            加速度センサの測定値
+VectorInt16 acceleration_without_gravity; // [x, y, z]            重力を除いた加速度センサの測定値
+VectorInt16 acceleration_world;			  // [x, y, z]            world-frame accel sensor measurements
+VectorFloat gravity;					  // [x, y, z]      gravity vector
+VectorInt16 gyro;						  // [x, y, z]      gyro vector
 float yaw_pitch_roll[3];
-enum YAW_PITCH_ROLL{
-YAW = 0,
-PITCH,
-ROLL
+enum YAW_PITCH_ROLLq
+{
+	YAW = 0,
+	PITCH,
+	ROLL
 };
 double A[3][4];
 double v;
@@ -308,18 +309,19 @@ void loop()
 	}
 	else if (mpuIntStatus & 0x02)
 	{
-		//FIFOが適切なサイズになるまで待機
-		while (fifoCount < packetSize){
+		//FIFOが適切なサイズになるまで待機q
+		while (fifoCount < packetSize)
+		{
 			fifoCount = mpu.getFIFOCount();
 		}
 
 		mpu.getFIFOBytes(fifoBuffer, packetSize);
 		fifoCount -= packetSize;
-		mpu.dmpGetQuaternion(&q, fifoBuffer);
+		mpu.dmpGetQuaternion(&quaternion, fifoBuffer);
 		mpu.dmpGetAccel(&acceleration_measured, fifoBuffer);
-		mpu.dmpGetGravity(&gravity, &q);
+		mpu.dmpGetGravity(&gravity, &quaternion);
 
-		mpu.dmpGetYawPitchRoll(yaw_pitch_roll, &q, &gravity);
+		mpu.dmpGetYawPitchRoll(yaw_pitch_roll, &quaternion, &gravity);
 
 		gy[YAW] = (double)yaw_pitch_roll[YAW];
 		gy[PITCH] = (double)yaw_pitch_roll[PITCH];
@@ -344,13 +346,13 @@ void loop()
 		long int intaaz = (long int)(aaz * 1000);
 
 		long int intypr[3];
-		intypr[0] = (long int)(yaw_pitch_roll[0] * 1000);
-		intypr[1] = (long int)(yaw_pitch_roll[1] * 1000);
-		intypr[2] = (long int)(yaw_pitch_roll[2] * 1000);
+		intypr[YAW] = (long int)(yaw_pitch_roll[YAW] * 1000);
+		intypr[PITCH] = (long int)(yaw_pitch_roll[PITCH] * 1000);
+		intypr[ROLL] = (long int)(yaw_pitch_roll[ROLL] * 1000);
 
-		double aaxT = (double)((-1) * intypr[0] * 1000 + 930 * intypr[1] * 1000 + 3 * intypr[2] * 1000 + 3 * intypr[1] * intypr[1] + (-4) * intypr[2] * intypr[2] + 10 * intypr[0] * intypr[1] + 4 * intypr[1] * intypr[2] + 3 * intypr[0] * intypr[2] + 10 * intaax * 1000);
-		double aayT = (double)(9 * intypr[0] * 1000 + (-20) * intypr[1] * 1000 + 940 * intypr[2] * 1000 + (-40) * intypr[1] * intypr[1] + (-30) * intypr[2] * intypr[2] + 30 * intypr[0] * intypr[1] + 40 * intypr[1] * intypr[2] + (-30) * intypr[0] * intypr[2] + 7 * intaay * 1000);
-		double aazT = (double)((-4) * intypr[0] * 1000 + 10 * intypr[1] * 1000 + (-20) * intypr[2] * 1000 + 5 * intypr[0] * intypr[0] + 9 * intypr[1] * intypr[1] + (-10) * intypr[2] * intypr[2] + (-30) * intypr[0] * intypr[1] + (-30) * intypr[1] * intypr[2] + 9 * intypr[0] * intypr[2] + 990 * intaaz * 1000);
+		double aaxT = (double)((-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 + 3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] + 4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000);
+		double aayT = (double)(9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 + (-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] + 40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000);
+		double aazT = (double)((-4) * intypr[YAW] * 1000 + 10 * intypr[PITCH] * 1000 + (-20) * intypr[ROLL] * 1000 + 5 * intypr[YAW] * intypr[YAW] + 9 * intypr[PITCH] * intypr[PITCH] + (-10) * intypr[ROLL] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[PITCH] + (-30) * intypr[PITCH] * intypr[ROLL] + 9 * intypr[YAW] * intypr[ROLL] + 990 * intaaz * 1000);
 		aaxT *= 0.000000001;
 		aayT *= 0.000000001;
 		aazT *= 0.000000001;
@@ -386,7 +388,6 @@ void loop()
 		static double oldr;
 		vh = 0.1 * vh + 0.9 * oldr;
 		oldr = vh;
-
 	}
 
 	static double gzzz;
@@ -546,12 +547,13 @@ void cal1(double f[3][3], double g[3][3])
 		}
 	}
 }
-double time_update(){
-    static double previous_time = micros(); //前回この関数が呼ばれた時間
-    double temp_time = micros();
-    double return_time = temp_time - previous_time;
-    previous_time = temp_time;
-    return return_time;
+double time_update()
+{
+	static double previous_time = micros(); //前回この関数が呼ばれた時間
+	double temp_time = micros();
+	double return_time = temp_time - previous_time;
+	previous_time = temp_time;
+	return return_time;
 }
 void pidx(double array[], double a_m, double PB, double DT, double Td, double T)
 {
