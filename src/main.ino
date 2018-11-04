@@ -48,11 +48,7 @@
 	===						GLOBAL VARIABLES			===
 ============================================================*/
 double vh;
-double gk;
-double xk;
-double Pk;
 
-double oldypr[3];
 double vz;
 double vn;
 double vn1 = 0;
@@ -103,7 +99,7 @@ double BPP = 520;
 char buf[100];
 int country = 0;
 int coucou = 0;
-//int w = 0;
+
 int spi1; //ピンから送られてきた信号
 int spi2;
 int spi3;
@@ -184,9 +180,6 @@ ISR(SPI_STC_vect)
 // ================================================================
 void setup()
 {
-	oldypr[0] = 0;
-	oldypr[1] = 0;
-	oldypr[2] = 0;
 	countx = 0;
 	jo = 1;
 
@@ -391,7 +384,6 @@ void loop()
 		vh = 0.1 * vh + 0.9 * oldr;
 		oldr = vh;
 
-		calman(vn, vh, delta_time_micro_second / 1000000);
 	}
 
 	static double gzzz;
@@ -679,16 +671,6 @@ void getkgl(double f, double e, double d)
 		}
 	}
 	cal1(buffer1, a);
-}
-
-void calman(double a, double y, double dt)
-{
-	double x_k = xk + a * dt;
-	double P_k = Pk + dt * dt * bv * bv;
-
-	gk = P_k / (P_k + cv * cv);
-	xk = x_k + gk * (y - x_k);
-	Pk = (1 - gk) * P_k;
 }
 /*float getHeight(float temperature, float pressure, float sPressure)
 {
