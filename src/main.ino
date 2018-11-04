@@ -10,7 +10,6 @@
 #include <Servo.h>
 #include <SPI.h>
 #include <Wire.h>
-//#include <MS5xxx.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
 /*===========================
@@ -94,7 +93,6 @@ double center = 0;
 double ptx = 0;
 double pty = 0;
 double ptz = 0;
-double ptzold = 0;
 double BPP = 520;
 char buf[100];
 int country = 0;
@@ -136,13 +134,10 @@ enum Coordunate{
 	COORDINATE_X = 0,
 	COORDINATE_Y,
 	COORDINATE_Z
-}
+};
 double A[3][4];
 double v;
 double vv;
-double y0;
-double y1;
-double y2;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 char jo;
 /*=========================================================
@@ -158,7 +153,6 @@ void pidh(double array[], double a_m, double PB, double DT, double Td, double T)
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
 double time_update(); //前回この関数が呼ばれてからの時間 us単位
-//MS5xxx sensor(&Wire);
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
 // ================================================================
@@ -314,7 +308,7 @@ void loop()
 	}
 	else if (mpuIntStatus & 0x02)
 	{
-		//FIFOが適切なサイズになるまで待機q
+		//FIFOが適切なサイズになるまで待機
 		while (fifoCount < packetSize)
 		{
 			fifoCount = mpu.getFIFOCount();
@@ -331,9 +325,9 @@ void loop()
 		gy[YAW] = (double)yaw_pitch_roll[YAW];
 		gy[PITCH] = (double)yaw_pitch_roll[PITCH];
 		gy[ROLL] = (double)yaw_pitch_roll[ROLL];
-		y0 = (-1) * yaw_pitch_roll[YAW];
-		y1 = (-1) * yaw_pitch_roll[PITCH];
-		y2 = yaw_pitch_roll[ROLL];
+		double y0 = (-1) * yaw_pitch_roll[YAW];
+		double y1 = (-1) * yaw_pitch_roll[PITCH];
+		double y2 = yaw_pitch_roll[ROLL];
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -669,8 +663,6 @@ void getkgl(double f, double e, double d)
 	double a[3][3] = {{1, 0, 0}, {0, cos(d), -1 * sin(d)}, {0, sin(d), cos(d)}};
 	double b[3][3] = {{cos(e), 0, sin(e)}, {0, 1, 0}, {-sin(e), 0, cos(e)}};
 	double c[3][3] = {{cos(f), -1 * sin(f), 0}, {sin(f), cos(f), 0}, {0, 0, 1}};
-	double i;
-	double r;
 	cal1(c, b);
 	for (int s = 0; s < 3; s++)
 	{
