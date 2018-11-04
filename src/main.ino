@@ -308,8 +308,11 @@ void loop()
 	}
 	else if (mpuIntStatus & 0x02)
 	{
-		while (fifoCount < packetSize)
+		//FIFOが適切なサイズになるまで待機
+		while (fifoCount < packetSize){
 			fifoCount = mpu.getFIFOCount();
+		}
+
 		mpu.getFIFOBytes(fifoBuffer, packetSize);
 		fifoCount -= packetSize;
 		mpu.dmpGetQuaternion(&q, fifoBuffer);
