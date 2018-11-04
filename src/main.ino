@@ -132,6 +132,11 @@ enum Yaw_Pitch_Roll
 	PITCH,
 	ROLL
 };
+enum Coordunate{
+	COORDINATE_X = 0,
+	COORDINATE_Y,
+	COORDINATE_Z
+}
 double A[3][4];
 double v;
 double vv;
@@ -192,9 +197,9 @@ void setup()
 	gy[1] = 0;
 	gy[2] = 0;
 
-	gyv[0] = 0;
-	gyv[1] = 0;
-	gyv[2] = 0;
+	gyv[COORDINATE_X] = 0;
+	gyv[COORDINATE_Y] = 0;
+	gyv[COORDINATE_Z] = 0;
 
 	kxa_a[0] = 0;
 	kxa_a[1] = 0;
@@ -332,9 +337,9 @@ void loop()
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
-		gyv[0] = (double)gyro.x;
-		gyv[1] = (double)gyro.y;
-		gyv[2] = (double)gyro.z;
+		gyv[COORDINATE_X] = (double)gyro.x;
+		gyv[COORDINATE_Y] = (double)gyro.y;
+		gyv[COORDINATE_Z] = (double)gyro.z;
 
 		getkgl((double)y0, (double)y1, (double)y2);
 		double aax = (double)acceleration_measured.x / 7600;
@@ -484,9 +489,9 @@ void loop()
 	if (country > 320)
 	{
 
-		cleenarray3(kx_a, gyv[0]);
-		cleenarray3(ky_a, gyv[1]);
-		cleenarray3(kz_a, gyv[2]);
+		cleenarray3(kx_a, gyv[COORDINATE_X]);
+		cleenarray3(ky_a, gyv[COORDINATE_Y]);
+		cleenarray3(kz_a, gyv[COORDINATE_Z]);
 		cleenarray3(kv_a, vn - v00);
 
 		if (countx == 9)
