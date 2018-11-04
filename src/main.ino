@@ -152,7 +152,7 @@ void pidy_a(double, double, double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
-double time_update();
+double time_update(); //前回この関数が呼ばれてからの時間 us単位
 //MS5xxx sensor(&Wire);
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
@@ -359,8 +359,7 @@ void loop()
 
 		vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
 
-		double delta_time_micro_second = time_update();				  //前回loopが呼ばれてから今loopが呼ばれるまでの時間 us単位
-		double delta_time_second = delta_time_micro_second / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
+		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
 		rvn = rvn1 + (vz - 1) * GRAVITATIONAL_ACCELERATION * delta_time_second;
 
