@@ -126,7 +126,7 @@ VectorInt16 acceleration_world;			  // [x, y, z]            world-frame accel se
 VectorFloat gravity;					  // [x, y, z]      gravity vector
 VectorInt16 gyro;						  // [x, y, z]      gyro vector
 float yaw_pitch_roll[3];
-enum YAW_PITCH_ROLLq
+enum Yaw_Pitch_Roll
 {
 	YAW = 0,
 	PITCH,
