@@ -144,9 +144,7 @@ char jo;
  ==========================================================*/
 void cal1(double f[3][3], double g[3][3]);
 void cleenarray3(double array[], double newdata);
-void pidx(double array[], double a_m, double PB, double DT, double Td, double T);
-void pidy(double array[], double a_m, double PB, double DT, double Td, double T);
-void pidz(double array[], double a_m, double PB, double DT, double Td, double T);
+double pid(double array[], double a_m, double PB, double DT, double Td, double T);
 void pidy_a(double, double, double, double, double, double);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
@@ -497,10 +495,9 @@ void loop()
 			pidz_a(kza_a, ptz, 180, 0, 0, 0.1);
 			countx = 0;
 		}
-
-		pidx(kx_a, kx_m, 0.732, 5.2286, 0.02562, 0.01);
-		pidy(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
-		pidz(kz_a, 0, 2.7, 32.5, 0, 0.01);
+		vkx = vkx + pid(kx_a, kx_m, 0.732, 5.2286, 0.02562, 0.01);
+		vky = vky + pid(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
+		vkz = vkz +  pid(kz_a, 0, 2.7, 32.5, 0, 0.01);
 		pidh(kv_a, center, 80, 20, 20, 0.01);
 		vp = (v + BPP); ///A[2][2];
 		if (vp > 600)
@@ -551,17 +548,9 @@ double time_update()
 	previous_time = temp_time;
 	return return_time;
 }
-void pidx(double array[], double a_m, double PB, double DT, double Td, double T)
+double pid(double array[], double a_m, double PB, double DT, double Td, double T)
 {
-	vkx = vkx + PB * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
-}
-void pidy(double array[], double a_m, double PB, double DT, double Td, double T)
-{
-	vky = vky + PB * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
-}
-void pidz(double array[], double a_m, double PB, double DT, double Td, double T)
-{
-	vkz = vkz + PB * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
+	return PB * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
 }
 void pidx_a(double array[], double a_m, double PB, double DT, double Td, double T)
 {
