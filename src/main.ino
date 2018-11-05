@@ -5,7 +5,6 @@
                     https://github.com/naoki-cpp/LYNCS_drone
 ==================================================================*/
 #include <math.h>
-#include <stdio.h>
 
 #include <Servo.h>
 #include <SPI.h>
@@ -362,7 +361,6 @@ void loop()
 
 		rvn = rvn1 + (vz - 1) * GRAVITATIONAL_ACCELERATION * delta_time_second;
 
-		//vn = rvn;
 		vn = (rvn * we - rvn2 * we - (delta_time_second / 2 * wh - 1) * (we - 2 / delta_time_second) * vn2 - ((delta_time_second / 2 * wh - 1) * (2 / delta_time_second + we) + (we - 2 / delta_time_second) * (1 + delta_time_second / 2 * wh)) * vn1) / (1 + delta_time_second / 2 * wh) / (2 / delta_time_second + we);
 		vn2 = vn1;
 		vn1 = vn;
@@ -673,7 +671,3 @@ void getkgl(double f, double e, double d)
 	}
 	cal1(buffer1, a);
 }
-/*float getHeight(float temperature, float pressure, float sPressure)
-{
-    return pow(1013.25 / sPressure, 1 / 5.256) * (pow(sPressure / pressure, 1 / 5.256) - 1.0) * (temperature + 273.15) / 0.0065;
-}*/
