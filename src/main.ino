@@ -129,7 +129,8 @@ enum Yaw_Pitch_Roll
 	PITCH,
 	ROLL
 };
-enum Coordunate{
+enum Coordunate
+{
 	COORDINATE_X = 0,
 	COORDINATE_Y,
 	COORDINATE_Z
@@ -138,14 +139,13 @@ double A[3][4];
 double v;
 double vv;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
-char jo;
 /*=========================================================
 	===						FUNCTIONS						===
  ==========================================================*/
 void cal1(double f[3][3], double g[3][3]);
 void cleenarray3(double array[], double newdata);
 double pid(double array[], double a_m, double PB, double DT, double Td, double T);
-void pidy_a(double, double, double, double, double, double);
+double pid_a(double array[], double a_m, double PB);
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
@@ -178,7 +178,6 @@ ISR(SPI_STC_vect)
 void setup()
 {
 	countx = 0;
-	jo = 1;
 
 	h_a[0] = 0;
 	h_a[1] = h_m;
@@ -490,14 +489,15 @@ void loop()
 			cleenarray3(kya_a, -gy[1]);
 			cleenarray3(kza_a, -gy[0]);
 
-			pidx_a(kxa_a, ptx, 180, 0, 0, 0.1);
-			pidy_a(kya_a, pty, 180, 0, 0, 0.1);
-			pidz_a(kza_a, ptz, 180, 0, 0, 0.1);
+			kx_m = pid_a(kxa_a, ptx, 180);
+			ky_m = pid_a(kya_a, pty, 180);
+			kz_m = pid_a(kza_a, ptz, 180);
+
 			countx = 0;
 		}
-		vkx = vkx + pid(kx_a, kx_m, 0.732, 5.2286, 0.02562, 0.01);
-		vky = vky + pid(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
-		vkz = vkz +  pid(kz_a, 0, 2.7, 32.5, 0, 0.01);
+		vkx += pid(kx_a, kx_m, 0.732, 5.2286, 0.02562, 0.01);
+		vky += pid(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
+		vkz += pid(kz_a, 0, 2.7, 32.5, 0, 0.01);
 		pidh(kv_a, center, 80, 20, 20, 0.01);
 		vp = (v + BPP); ///A[2][2];
 		if (vp > 600)
@@ -552,17 +552,9 @@ double pid(double array[], double a_m, double PB, double DT, double Td, double T
 {
 	return PB * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
 }
-void pidx_a(double array[], double a_m, double PB, double DT, double Td, double T)
+double pid_a(double array[], double a_m, double PB)
 {
-	kx_m = PB * (a_m - array[2]);
-}
-void pidy_a(double array[], double a_m, double PB, double DT, double Td, double T)
-{
-	ky_m = PB * (a_m - array[2]);
-}
-void pidz_a(double array[], double a_m, double PB, double DT, double Td, double T)
-{
-	kz_m = PB * (a_m - array[2]);
+	return PB * (a_m - array[2]);
 }
 
 void pidh(double array[], double a_m, double PB, double DT, double Td, double T)
