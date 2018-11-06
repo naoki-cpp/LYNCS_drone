@@ -635,13 +635,13 @@ void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4)
 	delay(1000);
 	Serial.println("start");
 }
-void getkgl(double f, double e, double d)
+void getkgl(double psi, double phi, double theta)
 {
-	static double buffer1[3][3];
-	double a[3][3] = {{1, 0, 0}, {0, cos(d), -1 * sin(d)}, {0, sin(d), cos(d)}};
-	double b[3][3] = {{cos(e), 0, sin(e)}, {0, 1, 0}, {-sin(e), 0, cos(e)}};
-	double c[3][3] = {{cos(f), -1 * sin(f), 0}, {sin(f), cos(f), 0}, {0, 0, 1}};
-	cal1(c, b);
+	double buffer1[3][3];
+	double R_roll_theta[3][3] = {{1, 0, 0}, {0, cos(theta), -1 * sin(theta)}, {0, sin(theta), cos(theta)}};
+	double R_pitch_phi[3][3] = {{cos(phi), 0, sin(phi)}, {0, 1, 0}, {-sin(phi), 0, cos(phi)}};
+	double R_yaw_psi[3][3] = {{cos(psi), -1 * sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
+	cal1(R_yaw_psi, R_pitch_phi);
 	for (int s = 0; s < 3; s++)
 	{
 		for (int f = 0; f < 3; f++)
@@ -649,5 +649,5 @@ void getkgl(double f, double e, double d)
 			buffer1[s][f] = A[s][f];
 		}
 	}
-	cal1(buffer1, a);
+	cal1(buffer1, R_roll_theta);
 }
