@@ -87,7 +87,6 @@ double h_a[3];
 const double h_m = 250;
 
 double v00;
-double vp = 0;
 double center = 0;
 double ptx = 0;
 double pty = 0;
@@ -499,7 +498,7 @@ void loop()
 		vky += pid(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
 		vkz += pid(kz_a, 0, 2.7, 32.5, 0, 0.01);
 		pidh(kv_a, center, 80, 20, 20, 0.01);
-		vp = (v + BPP); ///A[2][2];
+		double vp = (v + BPP); ///A[2][2];
 		if (vp > 600)
 		{
 			vp = 600;
