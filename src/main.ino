@@ -143,9 +143,9 @@ volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has g
  ==========================================================*/
 void cal1(double f[3][3], double g[3][3]);
 void cleenarray3(double array[], double newdata);
-double pid(double array[], double a_m, double PB, double DT, double Td, double T);
-double pid_a(double array[], double a_m, double PB);
-void pidh(double array[], double a_m, double PB, double DT, double Td, double T);
+double pid(double array[], double a_m, double proportion_value, double DT, double Td, double T);
+double pid_a(double array[], double a_m, double proportion_value);
+void pidh(double array[], double a_m, double proportion_value, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
 double time_update(); //前回この関数が呼ばれてからの時間 us単位
@@ -331,26 +331,29 @@ void loop()
 		gyv[COORDINATE_Z] = (double)gyro.z;
 
 		getkgl((double)y0, (double)y1, (double)y2);
+		//感度補正
 		double aax = (double)acceleration_measured.x / 7600;
 		double aay = (double)acceleration_measured.y / 8000;
 		double aaz = (double)acceleration_measured.z / 10200;
 
-		long int intaax = (long int)(aax * 1000);
-		long int intaay = (long int)(aay * 1000);
-		long int intaaz = (long int)(aaz * 1000);
+		double intaax = aax * 1000;
+		double intaay = aay * 1000;
+		double intaaz = aaz * 1000;
 
-		long int intypr[3];
-		intypr[YAW] = (long int)(yaw_pitch_roll[YAW] * 1000);
-		intypr[PITCH] = (long int)(yaw_pitch_roll[PITCH] * 1000);
-		intypr[ROLL] = (long int)(yaw_pitch_roll[ROLL] * 1000);
+		double intypr[3];
+		intypr[YAW] = yaw_pitch_roll[YAW] * 1000;
+		intypr[PITCH] = yaw_pitch_roll[PITCH] * 1000;
+		intypr[ROLL] = yaw_pitch_roll[ROLL] * 1000;
 
-		double aaxT = (double)((-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 + 3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] + 4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000);
-		double aayT = (double)(9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 + (-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] + 40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000);
-		double aazT = (double)((-4) * intypr[YAW] * 1000 + 10 * intypr[PITCH] * 1000 + (-20) * intypr[ROLL] * 1000 + 5 * intypr[YAW] * intypr[YAW] + 9 * intypr[PITCH] * intypr[PITCH] + (-10) * intypr[ROLL] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[PITCH] + (-30) * intypr[PITCH] * intypr[ROLL] + 9 * intypr[YAW] * intypr[ROLL] + 990 * intaaz * 1000);
+		//
+		double aaxT = (-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 + 3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] + 4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000;
+		double aayT = 9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 + (-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] + 40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000;
+		double aazT = (-4) * intypr[YAW] * 1000 + 10 * intypr[PITCH] * 1000 + (-20) * intypr[ROLL] * 1000 + 5 * intypr[YAW] * intypr[YAW] + 9 * intypr[PITCH] * intypr[PITCH] + (-10) * intypr[ROLL] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[PITCH] + (-30) * intypr[PITCH] * intypr[ROLL] + 9 * intypr[YAW] * intypr[ROLL] + 990 * intaaz * 1000;
 		aaxT *= 0.000000001;
 		aayT *= 0.000000001;
 		aazT *= 0.000000001;
 
+		//加速度の積分
 		vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
 
 		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
@@ -547,19 +550,19 @@ double time_update()
 	previous_time = temp_time;
 	return return_time;
 }
-double pid(double array[], double a_m, double PB, double DT, double Td, double T)
+double pid(double array[], double a_m, double proportion_value, double DT, double Td, double T)
 {
-	return PB * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
+	return proportion_value * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
 }
-double pid_a(double array[], double a_m, double PB)
+double pid_a(double array[], double a_m, double proportion_value)
 {
-	return PB * (a_m - array[2]);
+	return proportion_value * (a_m - array[2]);
 }
 
-void pidh(double array[], double a_m, double PB, double DT, double Td, double T)
+void pidh(double array[], double a_m, double proportion_value, double DT, double Td, double T)
 {
 	vv = vv + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
-	v = PB * (a_m - array[2]) + vv;
+	v = proportion_value * (a_m - array[2]) + vv;
 }
 void flypower(int out1, int out2, int out3, int out4)
 {
