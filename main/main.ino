@@ -182,9 +182,9 @@ void setup()
 	h_a[1] = h_m;
 	h_a[2] = h_m;
 
-	gy[0] = 0;
-	gy[1] = 0;
-	gy[2] = 0;
+	gy[YAW] = 0;
+	gy[PITCH] = 0;
+	gy[ROLL] = 0;
 
 	gyv[COORDINATE_X] = 0;
 	gyv[COORDINATE_Y] = 0;
@@ -386,16 +386,16 @@ void loop()
 	}
 
 	static double gzzz;
-	gzz0 = gy[0];
-	if ((gzzz - gy[0]) > M_PI)
+	gzz0 = gy[YAW];
+	if ((gzzz - gy[YAW]) > M_PI)
 	{
 		gztank += 2.0 * M_PI;
 	}
-	if ((gy[0] - gzzz) > M_PI)
+	if ((gy[YAW] - gzzz) > M_PI)
 	{
 		gztank += (-2.0) * M_PI;
 	}
-	gy[0] += gztank;
+	gy[YAW] += gztank;
 	gzzz = gzz0;
 
 	if (cspi1 == cspi2)
@@ -487,9 +487,9 @@ void loop()
 
 		if (countx == 9)
 		{
-			cleenarray3(kxa_a, gy[2]);
-			cleenarray3(kya_a, -gy[1]);
-			cleenarray3(kza_a, -gy[0]);
+			cleenarray3(kxa_a, gy[ROLL]);
+			cleenarray3(kya_a, -gy[PITCH]);
+			cleenarray3(kza_a, -gy[YAW]);
 
 			kx_m = pid_a(kxa_a, ptx, 180);
 			ky_m = pid_a(kya_a, pty, 180);
