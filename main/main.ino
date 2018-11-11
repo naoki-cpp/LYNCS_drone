@@ -11,6 +11,7 @@
 #include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include "Matrix.h"
 /*===========================
 ===       DEFINITIONS     ===
 =============================*/
@@ -133,14 +134,13 @@ enum Coordunate
 	COORDINATE_Y,
 	COORDINATE_Z
 };
-double A[3][3];
+lyncs::Matrix<double, 3, 3> A = {{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}};
 double v;
 double vv;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 /*=========================================================
 	===						FUNCTIONS						===
  ==========================================================*/
-void cal1(double A[3][3],double f[3][3], double g[3][3]);
 void cleenarray3(double array[], double newdata);
 double pid(double array[], double a_m, double proportion_value, double DT, double Td, double T);
 double pid_a(double array[], double a_m, double proportion_value);
@@ -148,6 +148,7 @@ void pidh(double array[], double a_m, double proportion_value, double DT, double
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
 double time_update(); //前回この関数が呼ばれてからの時間 us単位
+void GetRotationMatrix(lyncs::Matrix<double, 3, 3>& rotation_matrix ,const double psi, const double phi, const double theta);
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
 // ================================================================
@@ -322,7 +323,7 @@ void loop()
 		double y0 = (-1) * yaw_pitch_roll[YAW];
 		double y1 = (-1) * yaw_pitch_roll[PITCH];
 		double y2 = yaw_pitch_roll[ROLL];
-		getkgl((double)y0, (double)y1, (double)y2);
+		GetRotationMatrix(A,(double)y0, (double)y1, (double)y2);
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -330,7 +331,6 @@ void loop()
 		gyv[COORDINATE_Y] = (double)gyro.y;
 		gyv[COORDINATE_Z] = (double)gyro.z;
 
-		getkgl((double)y0, (double)y1, (double)y2);
 		//感度補正
 
 		double intaax = (double)acceleration_measured.x / 7.6;
@@ -351,7 +351,7 @@ void loop()
 		aazT *= 0.000000001;
 
 		//加速度の積分
-		vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
+		vz = A.GetElement(2, 0) * aaxT + A.GetElement(2, 1) * aayT + A.GetElement(2, 2) * aazT;
 
 		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
@@ -621,34 +621,11 @@ void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4)
 	delay(1000);
 	Serial.println("start");
 }
-void getkgl(double psi, double phi, double theta)
+void GetRotationMatrix(lyncs::Matrix<double, 3, 3>& rotation_matrix ,const double psi, const double phi, const double theta)
 {
 	double buffer1[3][3];
-	double R_roll_theta[3][3] = {{1, 0, 0}, {0, cos(theta), -1 * sin(theta)}, {0, sin(theta), cos(theta)}};
-	double R_pitch_phi[3][3] = {{cos(phi), 0, sin(phi)}, {0, 1, 0}, {-sin(phi), 0, cos(phi)}};
-	double R_yaw_psi[3][3] = {{cos(psi), -1 * sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
-	cal1(A,R_yaw_psi, R_pitch_phi);
-	for (int s = 0; s < 3; s++)
-	{
-		for (int f = 0; f < 3; f++)
-		{
-			buffer1[s][f] = A[s][f];
-		}
-	}
-	cal1(A,buffer1, R_roll_theta);
-}
-
-void cal1(double A[3][3], double f[3][3], double g[3][3])
-{
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-		{
-			A[i][j] = 0;
-			for (int t = 0; t < 3; ++t)
-			{
-				A[i][j] += f[i][t] * g[t][j];
-			}
-		}
-	}
+	lyncs::Matrix<double, 3, 3> R_roll_theta = {{{1, 0, 0}, {0, cos(theta), -1 * sin(theta)}, {0, sin(theta), cos(theta)}}};
+	lyncs::Matrix<double, 3, 3> R_pitch_phi = {{{cos(phi), 0, sin(phi)}, {0, 1, 0}, {-sin(phi), 0, cos(phi)}}};
+	lyncs::Matrix<double, 3, 3> R_yaw_psi = {{{cos(psi), -1 * sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}}};
+	rotation_matrix = (R_yaw_psi * R_pitch_phi) * R_roll_theta;
 }
