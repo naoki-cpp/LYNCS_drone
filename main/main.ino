@@ -14,13 +14,6 @@
 /*===========================
 ===       DEFINITIONS     ===
 =============================*/
-#define bv 0.05745024
-#define cv 0.009521774
-
-#define A_M 0.0017
-#define A_m 0.0013
-#define B_M 0.53
-#define B_m 0.5996
 #define Out1 5
 #define Out2 6
 #define Out3 9
@@ -31,15 +24,8 @@
 #define llow 1100
 #define echoPin 13 // Echo Pin
 #define trigPin 7  // Trigger Pin
-#define VB 300
-#define anga 1
-#define angb 1
-#define MaxP 1
-
 #define MaxC 1 // per sec
 #define MaxA 5
-#define chigh 400
-#define clow 0
 /*==========================================================
 	===						GLOBAL VARIABLES			===
 ============================================================*/
