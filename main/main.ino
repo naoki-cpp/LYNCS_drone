@@ -15,13 +15,6 @@
 /*===========================
 ===       DEFINITIONS     ===
 =============================*/
-#define bv 0.05745024
-#define cv 0.009521774
-
-#define A_M 0.0017
-#define A_m 0.0013
-#define B_M 0.53
-#define B_m 0.5996
 #define Out1 5
 #define Out2 6
 #define Out3 9
@@ -32,15 +25,8 @@
 #define llow 1100
 #define echoPin 13 // Echo Pin
 #define trigPin 7  // Trigger Pin
-#define VB 300
-#define anga 1
-#define angb 1
-#define MaxP 1
-
 #define MaxC 1 // per sec
 #define MaxA 5
-#define chigh 400
-#define clow 0
 /*==========================================================
 	===						GLOBAL VARIABLES			===
 ============================================================*/
@@ -147,8 +133,7 @@ double pid_a(double array[], double a_m, double proportion_value);
 void pidh(double array[], double a_m, double proportion_value, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
-double time_update(); //前回この関数が呼ばれてからの時間 us単位
-void GetRotationMatrix(lyncs::Matrix<double, 3, 3>& rotation_matrix ,const double psi, const double phi, const double theta);
+double TimeUpdate(); //前回この関数が呼ばれてからの時間 us単位
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
 // ================================================================
@@ -353,7 +338,7 @@ void loop()
 		//加速度の積分
 		vz = A.GetElement(2, 0) * aaxT + A.GetElement(2, 1) * aayT + A.GetElement(2, 2) * aazT;
 
-		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
+		double delta_time_second = TimeUpdate() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
 		rvn = rvn1 + (vz - 1) * kGravitationalAcceleration * delta_time_second;
 
@@ -525,7 +510,7 @@ void cleenarray3(double array[], double newdata)
 	array[1] = array[2];
 	array[2] = newdata;
 }
-double time_update()
+double TimeUpdate()
 {
 	static double previous_time = micros(); //前回この関数が呼ばれた時間
 	double temp_time = micros();
