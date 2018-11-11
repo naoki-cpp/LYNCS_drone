@@ -21,7 +21,6 @@
 #define A_m 0.0013
 #define B_M 0.53
 #define B_m 0.5996
-#define u 0
 #define Out1 5
 #define Out2 6
 #define Out3 9
@@ -41,7 +40,6 @@
 #define MaxA 5
 #define chigh 400
 #define clow 0
-#define GRAVITATIONAL_ACCELERATION 9.8
 /*==========================================================
 	===						GLOBAL VARIABLES			===
 ============================================================*/
@@ -56,6 +54,7 @@ double rvn1 = 0;
 double rvn2 = 0;
 const double we = 1600;
 const double wh = 2;
+const double kGravitationalAcceleration = 9.8;
 
 MPU6050 mpu; // MPU-6050 ジャイロスコープ・加速度センサのオブジェクト
 
@@ -134,14 +133,14 @@ enum Coordunate
 	COORDINATE_Y,
 	COORDINATE_Z
 };
-double A[3][4];
+double A[3][3];
 double v;
 double vv;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 /*=========================================================
 	===						FUNCTIONS						===
  ==========================================================*/
-void cal1(double f[3][3], double g[3][3]);
+void cal1(double A[3][3],double f[3][3], double g[3][3]);
 void cleenarray3(double array[], double newdata);
 double pid(double array[], double a_m, double proportion_value, double DT, double Td, double T);
 double pid_a(double array[], double a_m, double proportion_value);
@@ -323,6 +322,7 @@ void loop()
 		double y0 = (-1) * yaw_pitch_roll[YAW];
 		double y1 = (-1) * yaw_pitch_roll[PITCH];
 		double y2 = yaw_pitch_roll[ROLL];
+		getkgl((double)y0, (double)y1, (double)y2);
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -332,13 +332,10 @@ void loop()
 
 		getkgl((double)y0, (double)y1, (double)y2);
 		//感度補正
-		double aax = (double)acceleration_measured.x / 7600;
-		double aay = (double)acceleration_measured.y / 8000;
-		double aaz = (double)acceleration_measured.z / 10200;
 
-		double intaax = aax * 1000;
-		double intaay = aay * 1000;
-		double intaaz = aaz * 1000;
+		double intaax = (double)acceleration_measured.x / 7.6;
+		double intaay = (double)acceleration_measured.y / 8.0;
+		double intaaz = (double)acceleration_measured.z / 10.2;
 
 		double intypr[3];
 		intypr[YAW] = yaw_pitch_roll[YAW] * 1000;
@@ -358,7 +355,7 @@ void loop()
 
 		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
-		rvn = rvn1 + (vz - 1) * GRAVITATIONAL_ACCELERATION * delta_time_second;
+		rvn = rvn1 + (vz - 1) * kGravitationalAcceleration * delta_time_second;
 
 		vn = (rvn * we - rvn2 * we - (delta_time_second / 2 * wh - 1) * (we - 2 / delta_time_second) * vn2 - ((delta_time_second / 2 * wh - 1) * (2 / delta_time_second + we) + (we - 2 / delta_time_second) * (1 + delta_time_second / 2 * wh)) * vn1) / (1 + delta_time_second / 2 * wh) / (2 / delta_time_second + we);
 		vn2 = vn1;
@@ -501,7 +498,7 @@ void loop()
 		vky += pid(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
 		vkz += pid(kz_a, 0, 2.7, 32.5, 0, 0.01);
 		pidh(kv_a, center, 80, 20, 20, 0.01);
-		double vp = (v + BPP); ///A[2][2];
+		double vp = (v + BPP);
 		if (vp > 600)
 		{
 			vp = 600;
@@ -527,20 +524,6 @@ void cleenarray3(double array[], double newdata)
 	array[0] = array[1];
 	array[1] = array[2];
 	array[2] = newdata;
-}
-void cal1(double f[3][3], double g[3][3])
-{
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-		{
-			A[i][j] = 0;
-			for (int t = 0; t < 3; ++t)
-			{
-				A[i][j] += f[i][t] * g[t][j];
-			}
-		}
-	}
 }
 double time_update()
 {
@@ -644,7 +627,7 @@ void getkgl(double psi, double phi, double theta)
 	double R_roll_theta[3][3] = {{1, 0, 0}, {0, cos(theta), -1 * sin(theta)}, {0, sin(theta), cos(theta)}};
 	double R_pitch_phi[3][3] = {{cos(phi), 0, sin(phi)}, {0, 1, 0}, {-sin(phi), 0, cos(phi)}};
 	double R_yaw_psi[3][3] = {{cos(psi), -1 * sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
-	cal1(R_yaw_psi, R_pitch_phi);
+	cal1(A,R_yaw_psi, R_pitch_phi);
 	for (int s = 0; s < 3; s++)
 	{
 		for (int f = 0; f < 3; f++)
@@ -652,5 +635,20 @@ void getkgl(double psi, double phi, double theta)
 			buffer1[s][f] = A[s][f];
 		}
 	}
-	cal1(buffer1, R_roll_theta);
+	cal1(A,buffer1, R_roll_theta);
+}
+
+void cal1(double A[3][3], double f[3][3], double g[3][3])
+{
+	for (int i = 0; i < 3; ++i)
+	{
+		for (int j = 0; j < 3; ++j)
+		{
+			A[i][j] = 0;
+			for (int t = 0; t < 3; ++t)
+			{
+				A[i][j] += f[i][t] * g[t][j];
+			}
+		}
+	}
 }
