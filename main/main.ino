@@ -147,7 +147,7 @@ double pid_a(double array[], double a_m, double proportion_value);
 void pidh(double array[], double a_m, double proportion_value, double DT, double Td, double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
 void flypower(int out1, int out2, int out3, int out4);
-double time_update(); //前回この関数が呼ばれてからの時間 us単位
+double TimeUpdate(); //前回この関数が呼ばれてからの時間 us単位
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
 // ================================================================
@@ -353,7 +353,7 @@ void loop()
 		//加速度の積分
 		vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
 
-		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
+		double delta_time_second = TimeUpdate() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
 		rvn = rvn1 + (vz - 1) * kGravitationalAcceleration * delta_time_second;
 
@@ -525,7 +525,7 @@ void cleenarray3(double array[], double newdata)
 	array[1] = array[2];
 	array[2] = newdata;
 }
-double time_update()
+double TimeUpdate()
 {
 	static double previous_time = micros(); //前回この関数が呼ばれた時間
 	double temp_time = micros();
