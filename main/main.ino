@@ -120,7 +120,7 @@ enum Coordunate
 	COORDINATE_Y,
 	COORDINATE_Z
 };
-lyncs::Matrix<double, 3, 3> A = {{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}};
+lyncs::Matrix<double, 3, 3> rotation_matrix = {{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}};
 double v;
 double vv;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
@@ -308,7 +308,7 @@ void loop()
 		double y0 = (-1) * yaw_pitch_roll[YAW];
 		double y1 = (-1) * yaw_pitch_roll[PITCH];
 		double y2 = yaw_pitch_roll[ROLL];
-		GetRotationMatrix(A,(double)y0, (double)y1, (double)y2);
+		GetRotationMatrix(rotation_matrix,(double)y0, (double)y1, (double)y2);
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -328,15 +328,20 @@ void loop()
 		intypr[ROLL] = yaw_pitch_roll[ROLL] * 1000;
 
 		//
-		double aaxT = (-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 + 3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] + 4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000;
-		double aayT = 9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 + (-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] + 40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000;
+		double aaxT = (-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 + 
+											3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] + 
+											4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000;
+		
+		double aayT = 9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 + 
+									(-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] + 
+									40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000;
 		double aazT = (-4) * intypr[YAW] * 1000 + 10 * intypr[PITCH] * 1000 + (-20) * intypr[ROLL] * 1000 + 5 * intypr[YAW] * intypr[YAW] + 9 * intypr[PITCH] * intypr[PITCH] + (-10) * intypr[ROLL] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[PITCH] + (-30) * intypr[PITCH] * intypr[ROLL] + 9 * intypr[YAW] * intypr[ROLL] + 990 * intaaz * 1000;
 		aaxT *= 0.000000001;
 		aayT *= 0.000000001;
 		aazT *= 0.000000001;
 
 		//加速度の積分
-		vz = A.GetElement(2, 0) * aaxT + A.GetElement(2, 1) * aayT + A.GetElement(2, 2) * aazT;
+		vz = rotation_matrix.GetElement(2, 0) * aaxT + rotation_matrix.GetElement(2, 1) * aayT + rotation_matrix.GetElement(2, 2) * aazT;
 
 		double delta_time_second = TimeUpdate() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
