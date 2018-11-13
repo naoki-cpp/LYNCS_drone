@@ -11,7 +11,7 @@
 namespace lyncs
 {
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 struct Matrix
 {
 	T matrix_[COLUMN][ROW];
@@ -26,16 +26,16 @@ struct Matrix
 	const void WriteElement(unsigned int i, unsigned int j, T element);
 	//operators
 	const Matrix<T, COLUMN, ROW> operator+(const Matrix<T, COLUMN, ROW> &matrix) const;
-	template <unsigned int ROW2>
+	template <const unsigned int ROW2>
 	const Matrix<T, COLUMN, ROW2> operator*(const Matrix<T, ROW, ROW2> &matrix) const;
 	Matrix<T, COLUMN, ROW> &operator=(Matrix<T, COLUMN, ROW> matrix);
 };
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 Matrix<T, COLUMN, ROW>::~Matrix()
 {
 }
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 const T Matrix<T, COLUMN, ROW>::GetElement(const unsigned int i, const unsigned int j) const //TODO:(naoki-cpp) i,jが無効の場合の処理をうまいことやる.
 {
 	if (i < COLUMN && j < ROW)
@@ -45,7 +45,7 @@ const T Matrix<T, COLUMN, ROW>::GetElement(const unsigned int i, const unsigned 
 	return 0;
 }
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 const Matrix<T, 1, ROW> Matrix<T, COLUMN, ROW>::GetColumn(const unsigned int i) const //TODO:(naoki-cpp) iが無効の場合の処理をうまいことやる.
 {
 	Matrix<T, 1, ROW> column;
@@ -59,7 +59,7 @@ const Matrix<T, 1, ROW> Matrix<T, COLUMN, ROW>::GetColumn(const unsigned int i) 
 	return column;
 }
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 const Matrix<T, COLUMN, 1> Matrix<T, COLUMN, ROW>::GetRow(const unsigned int j) const //TODO:(naoki-cpp) iが無効の場合の処理をうまいことやる.
 {
 	Matrix<T, COLUMN, 1> row;
@@ -73,7 +73,7 @@ const Matrix<T, COLUMN, 1> Matrix<T, COLUMN, ROW>::GetRow(const unsigned int j) 
 	return row;
 }
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 const void Matrix<T, COLUMN, ROW>::WriteElement(unsigned int i, unsigned int j, T element)
 {
 	if (i < COLUMN && j < ROW)
@@ -82,7 +82,7 @@ const void Matrix<T, COLUMN, ROW>::WriteElement(unsigned int i, unsigned int j, 
 	}
 }
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 Matrix<T, COLUMN, ROW> &Matrix<T, COLUMN, ROW>::operator=(Matrix<T, COLUMN, ROW> matrix)
 {
 	for (int i = 0; i < COLUMN; i++)
@@ -95,7 +95,7 @@ Matrix<T, COLUMN, ROW> &Matrix<T, COLUMN, ROW>::operator=(Matrix<T, COLUMN, ROW>
 	return *this;
 }
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 const Matrix<T, COLUMN, ROW> Matrix<T, COLUMN, ROW>::operator+(const Matrix<T, COLUMN, ROW> &matrix) const
 {
 	Matrix<T, COLUMN, ROW> sum;
@@ -108,7 +108,7 @@ const Matrix<T, COLUMN, ROW> Matrix<T, COLUMN, ROW>::operator+(const Matrix<T, C
 	}
 	return sum;
 }
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 template <unsigned int ROW2>
 const Matrix<T, COLUMN, ROW2> Matrix<T, COLUMN, ROW>::operator*(const Matrix<T, ROW, ROW2> &matrix) const
 {
@@ -128,7 +128,7 @@ const Matrix<T, COLUMN, ROW2> Matrix<T, COLUMN, ROW>::operator*(const Matrix<T, 
 	return product;
 }
 
-template <typename T, unsigned int COLUMN, unsigned int ROW>
+template <typename T, const unsigned int COLUMN, const unsigned int ROW>
 const Matrix<T, ROW, COLUMN> TransposeMatrix(const Matrix<T, COLUMN, ROW> matrix)
 {
 	Matrix<T, ROW, COLUMN> transposed;
