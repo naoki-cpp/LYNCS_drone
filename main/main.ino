@@ -11,7 +11,7 @@
 #include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
-#include "Matrix.h"
+#include "local_libs/Matrix.h"
 /*===========================
 ===       DEFINITIONS     ===
 =============================*/
