@@ -11,17 +11,10 @@
 #include <Wire.h>
 #include "I2Cdev.h"
 #include "MPU6050_6Axis_MotionApps20.h"
+#include "local_libs/Matrix.h"
 /*===========================
 ===       DEFINITIONS     ===
 =============================*/
-#define bv 0.05745024
-#define cv 0.009521774
-
-#define A_M 0.0017
-#define A_m 0.0013
-#define B_M 0.53
-#define B_m 0.5996
-#define u 0
 #define Out1 5
 #define Out2 6
 #define Out3 9
@@ -32,16 +25,8 @@
 #define llow 1100
 #define echoPin 13 // Echo Pin
 #define trigPin 7  // Trigger Pin
-#define VB 300
-#define anga 1
-#define angb 1
-#define MaxP 1
-
-#define MaxC 1 // per sec
+#define MaxC 1	 // per sec
 #define MaxA 5
-#define chigh 400
-#define clow 0
-#define GRAVITATIONAL_ACCELERATION 9.8
 /*==========================================================
 	===						GLOBAL VARIABLES			===
 ============================================================*/
@@ -56,6 +41,7 @@ double rvn1 = 0;
 double rvn2 = 0;
 const double we = 1600;
 const double wh = 2;
+const double kGravitationalAcceleration = 9.8;
 
 MPU6050 mpu; // MPU-6050 ジャイロスコープ・加速度センサのオブジェクト
 
@@ -82,9 +68,7 @@ double kza_a[3];
 double kv_a[3];
 double gy[3];
 double gyv[3];
-int land = 0;
-double h_a[3];
-const double h_m = 250;
+bool land = false;
 
 double v00;
 double center = 0;
@@ -134,21 +118,21 @@ enum Coordunate
 	COORDINATE_Y,
 	COORDINATE_Z
 };
-double A[3][4];
+lyncs::Matrix<double, 3, 3> rotation_matrix = {{{0, 0, 0}, {0, 0, 0}, {0, 0, 0}}};
 double v;
-double vv;
 volatile bool mpuInterrupt = false; // indicates whether MPU interrupt pin has gone high
 /*=========================================================
 	===						FUNCTIONS						===
  ==========================================================*/
-void cal1(double f[3][3], double g[3][3]);
-void cleenarray3(double array[], double newdata);
-double pid(double array[], double a_m, double proportion_value, double DT, double Td, double T);
-double pid_a(double array[], double a_m, double proportion_value);
-void pidh(double array[], double a_m, double proportion_value, double DT, double Td, double T);
+void cleenarray3(double array[], const double newdata);
+double pid(double array[], const double a_m, const double proportion_value, const double DT, const double Td, const double T);
+double pid_a(double array[], const double a_m, const double proportion_value);
+double pidh(double array[], const double a_m, const double proportion_value, const double DT, const double Td, const double T);
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4);
-void flypower(int out1, int out2, int out3, int out4);
-double time_update(); //前回この関数が呼ばれてからの時間 us単位
+void FlyPower(Servo &rot, const unsigned int out);
+void OutputToServo(int out1, int out2, int out3, int out4);
+double TimeUpdate(); //前回この関数が呼ばれてからの時間 us単位
+void GetRotationMatrix(lyncs::Matrix<double, 3, 3> &rotation_matrix, const double psi, const double phi, const double theta);
 // ================================================================
 // ===               INTERRUPT DETECTION ROUTINE                ===
 // ================================================================
@@ -178,13 +162,9 @@ void setup()
 {
 	countx = 0;
 
-	h_a[0] = 0;
-	h_a[1] = h_m;
-	h_a[2] = h_m;
-
-	gy[0] = 0;
-	gy[1] = 0;
-	gy[2] = 0;
+	gy[YAW] = 0;
+	gy[PITCH] = 0;
+	gy[ROLL] = 0;
 
 	gyv[COORDINATE_X] = 0;
 	gyv[COORDINATE_Y] = 0;
@@ -323,6 +303,7 @@ void loop()
 		double y0 = (-1) * yaw_pitch_roll[YAW];
 		double y1 = (-1) * yaw_pitch_roll[PITCH];
 		double y2 = yaw_pitch_roll[ROLL];
+		GetRotationMatrix(rotation_matrix, (double)y0, (double)y1, (double)y2);
 
 		mpu.dmpGetGyro(&gyro, fifoBuffer);
 
@@ -330,35 +311,32 @@ void loop()
 		gyv[COORDINATE_Y] = (double)gyro.y;
 		gyv[COORDINATE_Z] = (double)gyro.z;
 
-		getkgl((double)y0, (double)y1, (double)y2);
 		//感度補正
-		double aax = (double)acceleration_measured.x / 7600;
-		double aay = (double)acceleration_measured.y / 8000;
-		double aaz = (double)acceleration_measured.z / 10200;
 
-		double intaax = aax * 1000;
-		double intaay = aay * 1000;
-		double intaaz = aaz * 1000;
+		double intaax = (double)acceleration_measured.x / 7.6;
+		double intaay = (double)acceleration_measured.y / 8.0;
+		double intaaz = (double)acceleration_measured.z / 10.2;
 
-		double intypr[3];
-		intypr[YAW] = yaw_pitch_roll[YAW] * 1000;
-		intypr[PITCH] = yaw_pitch_roll[PITCH] * 1000;
-		intypr[ROLL] = yaw_pitch_roll[ROLL] * 1000;
+		double intypr[3] = {yaw_pitch_roll[YAW] * 1000, yaw_pitch_roll[PITCH] * 1000, yaw_pitch_roll[ROLL] * 1000};
 
-		//
-		double aaxT = (-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 + 3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] + 4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000;
-		double aayT = 9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 + (-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] + 40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000;
+		double aaxT = (-1) * intypr[YAW] * 1000 + 930 * intypr[PITCH] * 1000 + 3 * intypr[ROLL] * 1000 +
+					  3 * intypr[PITCH] * intypr[PITCH] + (-4) * intypr[ROLL] * intypr[ROLL] + 10 * intypr[YAW] * intypr[PITCH] +
+					  4 * intypr[PITCH] * intypr[ROLL] + 3 * intypr[YAW] * intypr[ROLL] + 10 * intaax * 1000;
+
+		double aayT = 9 * intypr[YAW] * 1000 + (-20) * intypr[PITCH] * 1000 + 940 * intypr[ROLL] * 1000 +
+					  (-40) * intypr[PITCH] * intypr[PITCH] + (-30) * intypr[ROLL] * intypr[ROLL] + 30 * intypr[YAW] * intypr[PITCH] +
+					  40 * intypr[PITCH] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[ROLL] + 7 * intaay * 1000;
 		double aazT = (-4) * intypr[YAW] * 1000 + 10 * intypr[PITCH] * 1000 + (-20) * intypr[ROLL] * 1000 + 5 * intypr[YAW] * intypr[YAW] + 9 * intypr[PITCH] * intypr[PITCH] + (-10) * intypr[ROLL] * intypr[ROLL] + (-30) * intypr[YAW] * intypr[PITCH] + (-30) * intypr[PITCH] * intypr[ROLL] + 9 * intypr[YAW] * intypr[ROLL] + 990 * intaaz * 1000;
 		aaxT *= 0.000000001;
 		aayT *= 0.000000001;
 		aazT *= 0.000000001;
 
 		//加速度の積分
-		vz = A[2][0] * aaxT + A[2][1] * aayT + A[2][2] * aazT;
+		vz = rotation_matrix.GetElement(2, 0) * aaxT + rotation_matrix.GetElement(2, 1) * aayT + rotation_matrix.GetElement(2, 2) * aazT;
 
-		double delta_time_second = time_update() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
+		double delta_time_second = TimeUpdate() / 1000000; //前回loopが呼ばれてから今loopが呼ばれるまでの時間 s単位
 
-		rvn = rvn1 + (vz - 1) * GRAVITATIONAL_ACCELERATION * delta_time_second;
+		rvn = rvn1 + (vz - 1) * kGravitationalAcceleration * delta_time_second;
 
 		vn = (rvn * we - rvn2 * we - (delta_time_second / 2 * wh - 1) * (we - 2 / delta_time_second) * vn2 - ((delta_time_second / 2 * wh - 1) * (2 / delta_time_second + we) + (we - 2 / delta_time_second) * (1 + delta_time_second / 2 * wh)) * vn1) / (1 + delta_time_second / 2 * wh) / (2 / delta_time_second + we);
 		vn2 = vn1;
@@ -386,16 +364,16 @@ void loop()
 	}
 
 	static double gzzz;
-	gzz0 = gy[0];
-	if ((gzzz - gy[0]) > M_PI)
+	gzz0 = gy[YAW];
+	if ((gzzz - gy[YAW]) > M_PI)
 	{
 		gztank += 2.0 * M_PI;
 	}
-	if ((gy[0] - gzzz) > M_PI)
+	if ((gy[YAW] - gzzz) > M_PI)
 	{
 		gztank += (-2.0) * M_PI;
 	}
-	gy[0] += gztank;
+	gy[YAW] += gztank;
 	gzzz = gzz0;
 
 	if (cspi1 == cspi2)
@@ -446,10 +424,10 @@ void loop()
 		if (cspi1 == 8)
 		{
 			center = -0.5;
-			land = 1;
+			land = true;
 		}
 	}
-	if (land == 1)
+	if (land)
 	{
 		if (vn < v00 + 0.05 && vn > v00 - 0.05)
 		{
@@ -487,9 +465,9 @@ void loop()
 
 		if (countx == 9)
 		{
-			cleenarray3(kxa_a, gy[2]);
-			cleenarray3(kya_a, -gy[1]);
-			cleenarray3(kza_a, -gy[0]);
+			cleenarray3(kxa_a, gy[ROLL]);
+			cleenarray3(kya_a, -gy[PITCH]);
+			cleenarray3(kza_a, -gy[YAW]);
 
 			kx_m = pid_a(kxa_a, ptx, 180);
 			ky_m = pid_a(kya_a, pty, 180);
@@ -500,8 +478,8 @@ void loop()
 		vkx += pid(kx_a, kx_m, 0.732, 5.2286, 0.02562, 0.01);
 		vky += pid(ky_a, ky_m, 0.732, 5.63, 0.024, 0.01);
 		vkz += pid(kz_a, 0, 2.7, 32.5, 0, 0.01);
-		pidh(kv_a, center, 80, 20, 20, 0.01);
-		double vp = (v + BPP); ///A[2][2];
+		v = pidh(kv_a, center, 80, 20, 20, 0.01);
+		double vp = (v + BPP);
 		if (vp > 600)
 		{
 			vp = 600;
@@ -511,13 +489,13 @@ void loop()
 			vp = 200;
 		}
 
-		flypower(vkx + vky - vkz + vp + 1100, vkx - vky + vkz + vp + 1100, -vkx + vky + vkz + vp + 1100, -vkx - vky - vkz + vp + 1100);
+		OutputToServo(vkx + vky - vkz + vp + 1100, vkx - vky + vkz + vp + 1100, -vkx + vky + vkz + vp + 1100, -vkx - vky - vkz + vp + 1100);
 		countx++;
 	}
 
 	if (country <= 320)
 	{
-		flypower(1000 + country, 1000 + country, 1000 + country, 1000 + country);
+		OutputToServo(1000 + country, 1000 + country, 1000 + country, 1000 + country);
 	}
 
 	country++;
@@ -528,21 +506,7 @@ void cleenarray3(double array[], double newdata)
 	array[1] = array[2];
 	array[2] = newdata;
 }
-void cal1(double f[3][3], double g[3][3])
-{
-	for (int i = 0; i < 3; ++i)
-	{
-		for (int j = 0; j < 3; ++j)
-		{
-			A[i][j] = 0;
-			for (int t = 0; t < 3; ++t)
-			{
-				A[i][j] += f[i][t] * g[t][j];
-			}
-		}
-	}
-}
-double time_update()
+double TimeUpdate()
 {
 	static double previous_time = micros(); //前回この関数が呼ばれた時間
 	double temp_time = micros();
@@ -550,75 +514,42 @@ double time_update()
 	previous_time = temp_time;
 	return return_time;
 }
-double pid(double array[], double a_m, double proportion_value, double DT, double Td, double T)
+double pid(double array[], const double a_m, const double proportion_value, const double DT, const double Td, const double T)
 {
 	return proportion_value * (array[1] - array[2]) + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
 }
-double pid_a(double array[], double a_m, double proportion_value)
+double pid_a(double array[], const double a_m, const double proportion_value)
 {
 	return proportion_value * (a_m - array[2]);
 }
 
-void pidh(double array[], double a_m, double proportion_value, double DT, double Td, double T)
+double pidh(double array[], const double a_m, const double proportion_value, const double DT, const double Td, const double T)
 {
-	vv = vv + T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
-	v = proportion_value * (a_m - array[2]) + vv;
+	static double vv = 0;
+	vv += T * DT * (a_m - array[2]) - Td / T * (array[2] - 2 * array[1] + array[0]);
+	return proportion_value * (a_m - array[2]) + vv;
 }
-void flypower(int out1, int out2, int out3, int out4)
+void FlyPower(Servo &rot, const unsigned int out)
 {
-	// 出力コード
-	//out1の比較
-	if (llow <= out1 <= hhigh)
+	if (llow <= out <= hhigh)
 	{
-		rot1.writeMicroseconds(out1);
+		rot.writeMicroseconds(out);
 	}
-	if (out1 < llow)
+	if (out < llow)
 	{
-		rot1.writeMicroseconds(llow);
+		rot.writeMicroseconds(llow);
 	}
-	if (hhigh < out1)
+	if (hhigh < out)
 	{
-		rot1.writeMicroseconds(hhigh);
+		rot.writeMicroseconds(hhigh);
 	}
-	//out2の比較
-	if (llow <= out2 <= hhigh)
-	{
-		rot2.writeMicroseconds(out2);
-	}
-	if (out2 < llow)
-	{
-		rot2.writeMicroseconds(llow);
-	}
-	if (hhigh < out2)
-	{
-		rot2.writeMicroseconds(hhigh);
-	}
-	//out3の比較
-	if (llow <= out3 <= hhigh)
-	{
-		rot3.writeMicroseconds(out3);
-	}
-	if (out3 < llow)
-	{
-		rot3.writeMicroseconds(llow);
-	}
-	if (hhigh < out3)
-	{
-		rot3.writeMicroseconds(hhigh);
-	}
-	//out4の比較
-	if (llow <= out4 <= hhigh)
-	{
-		rot4.writeMicroseconds(out4);
-	}
-	if (out4 < llow)
-	{
-		rot4.writeMicroseconds(llow);
-	}
-	if (hhigh < out4)
-	{
-		rot4.writeMicroseconds(hhigh);
-	}
+}
+void OutputToServo(int out1, int out2, int out3, int out4)
+{
+	FlyPower(rot1,out1);
+	FlyPower(rot2,out2);
+	FlyPower(rot3,out3);
+	FlyPower(rot4,out4);
 }
 void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4)
 {
@@ -638,19 +569,11 @@ void calibration(Servo &rot1, Servo &rot2, Servo &rot3, Servo &rot4)
 	delay(1000);
 	Serial.println("start");
 }
-void getkgl(double psi, double phi, double theta)
+void GetRotationMatrix(lyncs::Matrix<double, 3, 3> &rotation_matrix, const double psi, const double phi, const double theta)
 {
 	double buffer1[3][3];
-	double R_roll_theta[3][3] = {{1, 0, 0}, {0, cos(theta), -1 * sin(theta)}, {0, sin(theta), cos(theta)}};
-	double R_pitch_phi[3][3] = {{cos(phi), 0, sin(phi)}, {0, 1, 0}, {-sin(phi), 0, cos(phi)}};
-	double R_yaw_psi[3][3] = {{cos(psi), -1 * sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}};
-	cal1(R_yaw_psi, R_pitch_phi);
-	for (int s = 0; s < 3; s++)
-	{
-		for (int f = 0; f < 3; f++)
-		{
-			buffer1[s][f] = A[s][f];
-		}
-	}
-	cal1(buffer1, R_roll_theta);
+	lyncs::Matrix<double, 3, 3> R_roll_theta = {{{1, 0, 0}, {0, cos(theta), -1 * sin(theta)}, {0, sin(theta), cos(theta)}}};
+	lyncs::Matrix<double, 3, 3> R_pitch_phi = {{{cos(phi), 0, sin(phi)}, {0, 1, 0}, {-sin(phi), 0, cos(phi)}}};
+	lyncs::Matrix<double, 3, 3> R_yaw_psi = {{{cos(psi), -1 * sin(psi), 0}, {sin(psi), cos(psi), 0}, {0, 0, 1}}};
+	rotation_matrix = (R_yaw_psi * R_pitch_phi) * R_roll_theta;
 }
